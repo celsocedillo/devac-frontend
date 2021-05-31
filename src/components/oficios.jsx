@@ -2,7 +2,7 @@ import React  from "react";
 import { Link } from "react-router-dom";
 import moment from 'moment';
 import NumberFormat from "react-number-format";
-import { Card, Table, Tag, Button, notification, Avatar, Popover, Badge } from 'antd';
+import { Row, Col, Card, Table, Tag, Button, notification, Avatar, Popover, Badge, Space } from 'antd';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlusSquare, faSearchPlus, faEllipsisH } from '@fortawesome/free-solid-svg-icons';
 
@@ -23,11 +23,15 @@ class Oficios extends React.Component {
             lista: [],
             loading: true,
             divFiltro: false,
+            demorados: 0
          }
     }
 
-     componentDidMount() {
-         this.obtenerData();
+     async componentDidMount() {
+        await this.obtenerData();
+        this.setState({demorados: this.state.lista.filter(a => a.diasEspera > 6).length})
+        //let contador = this.state.lista.filter(a => a.diasEspera > 6);
+        //console.log("contador", contador.length);
     }
 
     async obtenerData() {
@@ -59,7 +63,42 @@ class Oficios extends React.Component {
         const { lista, loading } = this.state;
         return(
            <Card title="Lista de oficios">
-               <Badge count={this.state.lista.length}></Badge>
+
+
+                    <Row style={{backgroundColor:"#ececec"}}>
+                        <Col span={2} style={{textAlign:"center"}}>
+                            <Card>
+                                <div>
+                                <Badge count={this.state.lista.length} style={{backgroundColor: "#40a9ff"}}>
+                                </Badge>
+                                </div>
+                                Sumillas
+                            </Card>
+                        </Col>
+                        <Col span={2} style={{textAlign:"center"}}>
+                            <Card>
+                                <div>
+                                <Badge count={this.state.demorados}>
+                                </Badge>
+                                </div>
+                                Demorados
+                            </Card>
+                        </Col>
+                        <Col span={2} style={{textAlign:"center"}} >
+                            <Card>
+                            <div>
+                                <Badge count={this.state.lista.length - this.state.demorados} style={{backgroundColor: "green"}}>
+                                </Badge>
+                                </div>
+                                En espera
+                            </Card>
+                        </Col>
+
+                    </Row>
+                    
+
+
+
                <Table dataSource={lista} size="small" pagination={false} loading={loading} rowKey="id" > 
                     <Column title="Id" dataIndex="id" key="id" width={20} />
                     <Column title="Año" dataIndex="anio" key="anio" width={30} />
