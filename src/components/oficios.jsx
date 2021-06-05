@@ -181,6 +181,7 @@ function Oficios(){
                 )
             }}
             />                    
+
             <Column title="" width={35} align="center" 
                      render={ rowData => 
                        <Link to={
