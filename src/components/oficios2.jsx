@@ -10,7 +10,7 @@ import { faPlusSquare, faSearchPlus, faEllipsisH } from '@fortawesome/free-solid
 
 require('dotenv').config();
 
-function Oficios(){
+function Oficios2(){
 
     const servidorAPI = process.env.REACT_APP_API_URL;
 
@@ -27,9 +27,10 @@ function Oficios(){
         async function obtenerData()  {
             setLoading(true);
             try {           
-                const response = await fetch(`${servidorAPI}oficios/2020`);
+                const response = await fetch(`${servidorAPI}ultimoOficios`);
                 const data = (await response.json());
                 if (response.status === 201){
+                    console.log("oficios", data.data);
                     setLista(data.data);
                     setDemorados((data.data.filter( a => a.diasEspera > 6)).length);
                     setEnEspera(data.data.length - (data.data.filter( a => a.diasEspera > 6)).length)
@@ -41,7 +42,7 @@ function Oficios(){
             } catch (error) {
                 notification['error']({
                     message: 'Error',
-                    description: `Error al cargar los contratos ${error}`
+                    description: `Error al cargar los oficios ${error}`
                   });    
             }
        }
@@ -62,40 +63,10 @@ function Oficios(){
     
     return(
         <Card title="Lista de oficios">
-            <Row style={{backgroundColor:"#ececec"}}>
-                <Col span={2} style={{textAlign:"center"}}>
-                    <Card>
-                        <div>
-                        <Badge count={lista?.length} style={{backgroundColor: "#40a9ff"}}>
-                        </Badge>
-                        </div>
-                        Sumillas
-                    </Card>
-                </Col>
-                <Col span={2} style={{textAlign:"center"}}>
-                    <Card>
-                        <div>
-                        <Badge count={demorados}>
-                        </Badge>
-                        </div>
-                        Demorados
-                    </Card>
-                </Col>
-                <Col span={2} style={{textAlign:"center"}} >
-                    <Card>
-                    <div>
-                        <Badge count={enEspera} style={{backgroundColor: "green"}}>
-                        </Badge>
-                        </div>
-                        En espera
-                    </Card>
-                </Col>
-            </Row>
-
             <Table dataSource={lista} size="small" pagination={false} loading={loading} rowKey="id" > 
             <Column title="Id" dataIndex="id" key="id" width={20} />
             <Column title="Año" dataIndex="anio" key="anio" width={30} />
-            <Column title="Registro" dataIndex="registroDepartamento" key="registroDepartamento" width={30} />
+            <Column title="Registro" dataIndex="registroDpto" key="registroDpto" width={30} />
             <Column title="Fecha" key="fechaIngreso" width={30} 
                 sorter={(a, b) => moment(a.fechaIngreso).unix() - moment(b.fechaIngreso).unix()}
                 render={rowData => (moment(rowData.fechaIngreso).format("DD/MM/YYYY"))}/>
@@ -128,7 +99,7 @@ function Oficios(){
                 </div>
             )}}
             />
-            <Column title="FechaSumilla" key="fechaSumilla" width={30} 
+            {/* <Column title="FechaSumilla" key="fechaSumilla" width={30} 
                 sorter={(a, b) => moment(a.fechaSumilla).unix() - moment(b.fechaSumilla).unix()}
                 render={rowData => (moment(rowData.fechaSumilla).format("DD/MM/YYYY"))}/>
 
@@ -141,9 +112,9 @@ function Oficios(){
                         </Avatar> 
                     </div>
                 )}}
-            />
+            /> */}
 
-            <Column title="Sumillado" 
+            {/* <Column title="Sumillado" 
                 render={rowData => {return(
                     <div>
                         {rowData.sumillaUsuarioDestino}
@@ -169,8 +140,8 @@ function Oficios(){
                         </div>
                     )}
                 }
-            />
-            <Column title="Espera" width={30} 
+            /> */}
+            {/* <Column title="Espera" width={30} 
             sorter={(a, b) => a.diasEspera - b.diasEspera}
             render={rowData => {
                 return(
@@ -190,20 +161,7 @@ function Oficios(){
                        ><FontAwesomeIcon icon={faSearchPlus}></FontAwesomeIcon>
                        </Link> 
                      }>
-            </Column>
-            {/* <Column title="Estado" key="estado" width={50} sorter={(a, b) => a.estado.localeCompare(b.estado)} 
-                onFilter= {(value, record) => record.estado.indexOf(value) === 0}
-                render={rowData => {
-                return(
-                    (
-                        rowData.sumillaEstado === "S" ?
-                        <Tag  color="red" style={{fontSize: '11px', lineHeight: '15px'}} >En espera</Tag>
-                        :
-                        <Tag style={{fontSize: '11px', lineHeight: '15px'}} >Ingesado</Tag>
-                    )
-                    )
-                }
-            }/> */}
+            </Column> */}
        </Table>                 
 
 
@@ -213,4 +171,4 @@ function Oficios(){
 
 };
 
-export default Oficios;
+export default Oficios2;

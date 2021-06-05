@@ -11,8 +11,9 @@ function ModalOficio(props){
     const [isOpen, setIsOpen]= useState(false);
 
     useEffect(() => {
+        props.show && 
         console.log("buscar aqui oficio")
-    }, []);
+    }, [props.show]);
 
     return(
         <Modal
