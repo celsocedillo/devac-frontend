@@ -6,7 +6,7 @@ import NumberFormat from "react-number-format";
 import ModalOficio from './modalOficio';
 import { Row, Col, Card, Table, Tag, Button, notification, Avatar, Popover, Badge, Space } from 'antd';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlusSquare, faSearchPlus, faEllipsisH } from '@fortawesome/free-solid-svg-icons';
+import { faShareSquare, faSearchPlus, faEllipsisH, faUser, faCity, faSignInAlt } from '@fortawesome/free-solid-svg-icons';
 
 require('dotenv').config();
 
@@ -64,13 +64,27 @@ function Oficios2(){
     return(
         <Card title="Lista de oficios">
             <Table dataSource={lista} size="small" pagination={false} loading={loading} rowKey="id" > 
-            <Column title="Id" dataIndex="id" key="id" width={20} />
-            <Column title="Año" dataIndex="anio" key="anio" width={30} />
-            <Column title="Registro" dataIndex="registroDpto" key="registroDpto" width={30} />
-            <Column title="Fecha" key="fechaIngreso" width={30} 
+            <Column title="Año" dataIndex="anio" key="anio" />
+            <Column title="Registro" dataIndex="registroDpto" key="registroDpto"  />
+            <Column title="Fecha" key="fechaIngreso" 
                 sorter={(a, b) => moment(a.fechaIngreso).unix() - moment(b.fechaIngreso).unix()}
                 render={rowData => (moment(rowData.fechaIngreso).format("DD/MM/YYYY"))}/>
-            <Column title="Asunto" width={80} 
+            <Column title="Remitente" key="usuarioOrigen" width={220}
+                    render={rowData => {
+                        return(
+                            <div>
+                                {rowData.tipoDocumento === "I" ? <div><FontAwesomeIcon style={{color:"#faad14"}}  icon={faUser}/> {` ${rowData.usuarioOrigen}`}</div>
+                                : <div><FontAwesomeIcon style={{color:"purple"}} icon={faSignInAlt}/> {` ${rowData.usuarioOrigen} - ${rowData.dptoOrigen}`}</div>
+                                }
+                                
+                                
+                            </div>
+                        )
+                    }}
+            />                
+            <Column title="Oficio"  
+                render={rowData => (`${rowData.tipoOficio}-${rowData.anio}-${rowData.digitos}`)}/>
+            <Column title="Asunto"  
                 render={rowData => { return(
                 <div>
                     <span style={{whiteSpace:"nowrap"}}> 
@@ -86,12 +100,6 @@ function Oficios2(){
                         :rowData.asunto}                            
                     </span>
                     <div style={{fontSize:"11px"}}>
-                        <span style={{color:"gray"}}>
-                            Remitente: 
-                        </span>
-                        <span style={{color:"#629db1"}}>
-                            {`${rowData.usuarioOrigen}, `}
-                        </span>
                         <span style={{color:"#5a9e5a"}}>
                             {rowData.departamentoOrigen}
                         </span>
@@ -99,6 +107,26 @@ function Oficios2(){
                 </div>
             )}}
             />
+            <Column title="Sumillas" 
+                render={rowData => {return(
+                    <div>
+                        {rowData.sumillas > 0 && <Badge offset={[3,10]} size="small" style={{backgroundColor:"green"}} count={rowData.sumillas}><FontAwesomeIcon style={{width:"15px", height:"15px"}} icon={faShareSquare} /></Badge>
+                                         
+                        }
+                    </div>
+                )}}
+            />
+            <Column title="" width={35} align="center" 
+                     render={ rowData => 
+                       <Link to={
+                                {
+                                pathname: `/oficio/${rowData.id}`
+                                }}
+                       ><FontAwesomeIcon icon={faSearchPlus}></FontAwesomeIcon>
+                       </Link> 
+                     }>
+            </Column>
+
             {/* <Column title="FechaSumilla" key="fechaSumilla" width={30} 
                 sorter={(a, b) => moment(a.fechaSumilla).unix() - moment(b.fechaSumilla).unix()}
                 render={rowData => (moment(rowData.fechaSumilla).format("DD/MM/YYYY"))}/>
@@ -152,16 +180,7 @@ function Oficios2(){
                 )
             }}
             />                    
-            <Column title="" width={35} align="center" 
-                     render={ rowData => 
-                       <Link to={
-                                {
-                                pathname: `/oficio/${rowData.id}`
-                                }}
-                       ><FontAwesomeIcon icon={faSearchPlus}></FontAwesomeIcon>
-                       </Link> 
-                     }>
-            </Column> */}
+ */}
        </Table>                 
 
 

@@ -18,11 +18,12 @@ function App() {
     <Fragment>
       
     <Router>
-      <Switch>
+      
         
           <Layout>
             <Cabecera/>
             <Content>
+            <Switch>
               <Route exact path="/oficios" component={Oficios} />
               <Route exact path="/oficio/:id" >
                 <Oficio/>
@@ -30,13 +31,10 @@ function App() {
               <Route exact path="/ultimos" >
                 <Oficios2/>
               </Route>
-              {/* <Route exact path="/contrato/:id" component={Contrato} />
-              <Route exact path="/contrato" component={Contrato} /> */}
+              </Switch>              
             </Content>
           </Layout>
-        
-        {/* <Route path="/redireccion/:usuario" component={Redireccion}/> */}
-      </Switch>
+      
     </Router>
     </Fragment>
   );
