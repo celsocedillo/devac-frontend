@@ -215,3 +215,8 @@ code {
     border: 1px solid #9bd3ff;
      box-shadow: 5px 3px 3px #9be0ff;
 }
+
+.ant-divider-horizontal.ant-divider-with-text {
+  margin: 8px 0;
+  font-size: 14px;
+}
