@@ -49,13 +49,6 @@ function Oficios(){
        obtenerData();
     }, []);
 
-    if (lista){
-        console.log("lista", lista);
-    }else{
-        console.log("vacio");
-    }
-    
-
     const closeModalOficio =  async (show) => {
         setShowModalOficio(show);
     }

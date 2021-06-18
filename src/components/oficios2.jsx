@@ -6,7 +6,7 @@ import NumberFormat from "react-number-format";
 import ModalOficio from './modalOficio';
 import { Row, Col, Card, Table, Tag, Button, notification, Avatar, Popover, Badge, Space } from 'antd';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faShareSquare, faSearchPlus, faEllipsisH, faUser, faCity, faSignInAlt } from '@fortawesome/free-solid-svg-icons';
+import { faShareSquare, faSearchPlus, faEllipsisH, faUser, faCity, faSignInAlt, faReply } from '@fortawesome/free-solid-svg-icons';
 
 require('dotenv').config();
 
@@ -30,7 +30,6 @@ function Oficios2(){
                 const response = await fetch(`${servidorAPI}ultimoOficios`);
                 const data = (await response.json());
                 if (response.status === 201){
-                    console.log("oficios", data.data);
                     setLista(data.data);
                     setDemorados((data.data.filter( a => a.diasEspera > 6)).length);
                     setEnEspera(data.data.length - (data.data.filter( a => a.diasEspera > 6)).length)
@@ -49,13 +48,6 @@ function Oficios2(){
 
        obtenerData();
     }, []);
-
-    if (lista){
-        console.log("lista", lista);
-    }else{
-        console.log("vacio");
-    }
-    
 
     const closeModalOficio =  async (show) => {
         setShowModalOficio(show);
@@ -110,7 +102,19 @@ function Oficios2(){
             <Column title="Sumillas" 
                 render={rowData => {return(
                     <div>
-                        {rowData.sumillas > 0 && <Badge offset={[3,10]} size="small" style={{backgroundColor:"green"}} count={rowData.sumillas}><FontAwesomeIcon style={{width:"15px", height:"15px"}} icon={faShareSquare} /></Badge>
+                        {rowData.sumillas > 0 && <Badge offset={[3,10]} size="small" style={{backgroundColor:"green", fontSize: "11px"}} count={rowData.sumillas} >
+                                                <FontAwesomeIcon style={{width:"15px", height:"15px"}} icon={faShareSquare} />
+                                                </Badge>
+                                         
+                        }
+                    </div>
+                )}}
+            />
+            <Column title="Resp" 
+                render={rowData => {return(
+                    <div>
+                        {rowData.contestacion > 0 && 
+                                                <FontAwesomeIcon style={{width:"15px", height:"15px", color:"#096dd9"}} icon={faReply} />
                                          
                         }
                     </div>
