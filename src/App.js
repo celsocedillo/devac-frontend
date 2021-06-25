@@ -5,11 +5,9 @@ import React, { Fragment } from 'react';
 import Cabecera from './components/layouts/cabecera'
 import { Layout } from 'antd';
 import {  BrowserRouter as Router, Switch, Route} from "react-router-dom";
-import Oficios from './components/oficios';
+import EnEspera from './components/enEspera';
 import  Oficio  from './components/oficio';
-import  Oficios2  from './components/oficios2';
-// import Contrato from './components/contrato';
-// import Redireccion from './components/redireccion';
+import  Oficios  from './components/oficios';
 
 const { Content } = Layout;
 
@@ -24,12 +22,12 @@ function App() {
             <Cabecera/>
             <Content>
             <Switch>
-              <Route exact path="/oficios" component={Oficios} />
+              <Route exact path="/enEspera" component={EnEspera} />
               <Route exact path="/oficio/:id" >
                 <Oficio/>
               </Route>
-              <Route exact path="/ultimos" >
-                <Oficios2/>
+              <Route exact path="/oficios" >
+                <Oficios/>
               </Route>
               </Switch>              
             </Content>

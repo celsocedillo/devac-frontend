@@ -1,12 +1,13 @@
 import React, {useState, useEffect}  from "react";
-import {  useParams } from "react-router-dom";
+import {  Link, useLocation, useParams } from "react-router-dom";
 import { Row, Col, Card, Table, Tag, Button, notification, Badge, Space, Descriptions,  
          Tabs, Tooltip, Form, Input, Modal, Select, AutoComplete, Spin, Popconfirm,
         Skeleton } from 'antd';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser, faSignInAlt, faPlus, faEdit } from '@fortawesome/free-solid-svg-icons';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { IoArrowRedoOutline, IoArrowUndoOutline, IoCalendarClearOutline, IoDocumentTextOutline, 
-         IoPersonOutline, IoExitOutline, IoTrashOutline, IoCreateOutline, IoPencil } from 'react-icons/io5'
+         IoPersonOutline, IoExitOutline, IoTrashOutline, IoPencil, IoChevronForwardCircleOutline,
+         IoMailOutline, IoPersonCircleOutline, IoArrowBackCircleOutline, IoArrowBackOutline } from 'react-icons/io5'
 import { HiOutlineOfficeBuilding } from 'react-icons/hi';
 import TextArea from "antd/lib/input/TextArea";
 import moment from 'moment';
@@ -14,29 +15,24 @@ import moment from 'moment';
 
 
 
-const Oficio = () => {
-    console.log("Inicio");
+const Oficio = (props) => {
+    
+
     const [oficio, setOficio] = useState({})
     const [loading, setLoading] = useState(true);
     const [departamentos, setDepartamentos] = useState([]);
     const [estadoUsuarios, setEstadoUsuarios] = useState([]);
     const [visAgregaSumilla, setVisAgregaSumilla] = useState(false);
-    const [sumillaPresioanada, setSumillaPresionada] = useState({});
     const [sumillas, setSumillas] = useState([]);
-    const [usuarioSeleccionado, setUsuarioSeleccionado] = useState({idUsuario: '', usuario:'', departamentoId: '', departamento:''});
-    const [frmAgregaSumilla]  = Form.useForm();
     const [clientesFiltrados, setClientesFiltrados] = useState([]);
-    const [valBuscarCliente, setValBuscarCliente]=useState({});
     const [confirmBorrar, setConfirmBorrar]=useState(false);
-    const [edicionSumilla, setEdicionSumilla]=useState(false);
-    const [sumillaAEditar, setSumillaAEditar]=useState(null);
     const [sumillaActual, setSumillaActual]=useState({
         anioContesta: null,
         contestacion: null,
         diasEspera: null,
         digitosContesta: null,
         estadoSumilla: null,
-        fechaSumilla: null,
+        fechaSumilla: moment(),
         observacion: null,
         registroContesta: null,
         siglas: null,
@@ -52,20 +48,23 @@ const Oficio = () => {
         sumilla: null,
         sumillado: null
     });
+    const [nuevaSumilla, setNuevaSumilla]=useState(false)
 
     const servidorAPI = process.env.REACT_APP_API_URL;
+    const [frmAgregaSumilla]  = Form.useForm();
+    const [frmOficio]  = Form.useForm();
     const params = useParams();
+    const location = useLocation();
 
     const { Column } = Table;
     const {TabPane} = Tabs;
 
     useEffect( () => {
+        console.log("location", location);
         obtenerOficio();
         obtenerDepartamentos();
         obtenerEstadoUsuarios();
     }, [])
-
-    
 
     const obtenerOficio = async () => {
         try {           
@@ -75,6 +74,7 @@ const Oficio = () => {
             if (response.status === 201){
                 console.log("oficio", data.data);
                 setOficio(data.data);
+                llenaFormulario(data.data);
             }else{
                 throw new Error (`[${data.error}]`)                    
             }            
@@ -126,62 +126,52 @@ const Oficio = () => {
         }
     }
 
+    const llenaFormulario = (datos) =>{
+        frmOficio.setFieldsValue({'txtRegistro': `${datos.anio}- ${datos.registroDpto}`})
+        frmOficio.setFieldsValue({'txtOficio': `${datos?.tipoOficio} - ${datos?.anio} - ${datos?.digitos}`})
+        frmOficio.setFieldsValue({'txtRemitente': ` ${datos.usuarioOrigen} - ${datos.dptoOrigen}`})
+        frmOficio.setFieldsValue({'txtDestinatario': datos.usuarioDestino})
+        frmOficio.setFieldsValue({'txtAsunto': datos.asunto})
+        frmOficio.setFieldsValue({'txtObservacion': datos.observacion})
+    }
+
     const clickSumillaDirecta = (item) => {
-        setEdicionSumilla(false);
-        setSumillaPresionada(item);
+        setNuevaSumilla(true);
         setVisAgregaSumilla(true);
-        setUsuarioSeleccionado({
-            idUsuario: item.usuario, 
-            usuario: item.empleado, 
-            departamentoId: item.corrIdDepartamento, 
-            departamento:item.departamento
-        })
         setSumillaActual({...sumillaActual,
+            fechaSumilla: moment(),
             sumiIdUsuarioDestino: item.usuario,
             sumiUsuarioDestino: item.empleado,
             sumiIdDpto: item.corrIdDepartamento,
             sumiDptoDestino: item.departamento
-        });        
+        }); 
+        frmAgregaSumilla.resetFields();       
         frmAgregaSumilla.setFieldsValue({'txtUsuario':item.empleado})
         frmAgregaSumilla.setFieldsValue({'txtDepartamento':item.departamento})
     }
 
     const clickSumilla = () => {
-        console.log("click");
-        setEdicionSumilla(false);
+        setNuevaSumilla(true);
         setVisAgregaSumilla(true);
+        setSumillaActual({...sumillaActual,
+            fechaSumilla: moment()
+        }); 
+        frmAgregaSumilla.resetFields();
     }
 
     const aceptarSumilla = async () =>{
         frmAgregaSumilla.validateFields().then( async values => {
-            console.log("Ok a grabar", frmAgregaSumilla.getFieldValue('sltEstadoUsuarios'));
             setVisAgregaSumilla(false);
-            // let registro ={
-            //     idRegistro: oficio.id,
-            //     fechaEnvio: moment(),
-            //     idUsuarioDestino: usuarioSeleccionado.idUsuario,
-            //     idDptoDestino: usuarioSeleccionado.departamentoId,
-            //     estadoUsuarios: frmAgregaSumilla.getFieldValue('sltEstadoUsuarios'),
-            //     usuarioDestino: usuarioSeleccionado.usuario,
-            //     dptoDestino: usuarioSeleccionado.departamento,
-            //     sumilla: frmAgregaSumilla.getFieldValue('txtSumilla'),
-            //     idRegistro2: oficio.id,
-            //     idSecRegistro2: oficio.idSecRegistro,
-            //     tipo: 'S',
-            //     idSecRegistro: sumillaAEditar
-            // };
             let registro = {...sumillaActual, 
                 sumilla: frmAgregaSumilla.getFieldValue('txtSumilla'),
                 sumiEstadoUsuarios: frmAgregaSumilla.getFieldValue('sltEstadoUsuarios'),
                 idRegistro2: oficio.id,
                 idSecRegistro2: oficio.idSecRegistro,
                 idRegistro: oficio.id,
-                fechaSumilla: moment()
+                fechaSumilla: moment(),
+                estadoSumilla:  estadoUsuarios.filter(item => item.id === frmAgregaSumilla.getFieldValue('sltEstadoUsuarios'))[0].estado   
             }
-            console.log("registro", registro);
-            edicionSumilla ? 
-                  updateSumilla(registro)
-                : insertaSumilla(registro);
+            nuevaSumilla ? insertaSumilla(registro) : updateSumilla(registro);
             frmAgregaSumilla.resetFields();
         }).catch(info => {
             console.log("Validacion");
@@ -193,33 +183,9 @@ const Oficio = () => {
             let response  = await fetch(`${servidorAPI}sumilla`, {method: "post", headers: {'Content-Type':'application/json'}, body: JSON.stringify(registro)});
             const data = await response.json();
             if (response.status === 201){
-                let estado = '';
                 let cambio = [...sumillas];
-                //registro.estadoUsuarios === "S" ? estado = "EN ESPERA" : estado = "ENVIADO";
-                registro.idSecRegistro= data.data;
+                registro.sumiIdSecRegistro= data.data;
                 registro.estadoSumilla = estadoUsuarios.filter(item => item.id === registro.sumiEstadoUsuarios)[0].estado   
-                // let sumilla = {
-                //     anioContesta: null,
-                //     contestacion: null,
-                //     diasEspera: 0,
-                //     digitosContesta: null,
-                //     estadoSumilla:estado,
-                //     fechaSumilla: Date.now(),
-                //     observacion: null,
-                //     registroContesta: null,
-                //     siglas: null,
-                //     sumiDptoDestino: registro.dptoDestino,
-                //     sumiEstadoUsuarios: registro.estadoUsuarios,
-                //     sumiFechaContesta: null,
-                //     sumiFechaVencimiento: null,
-                //     sumiIdDpto: registro.idDptoDestino,
-                //     sumiIdSecRegistro: data.data,
-                //     sumiIdUsuarioDestino: registro.idUsuarioDestino,
-                //     sumiIdRegistroDpto: null,
-                //     sumiUsuarioDestino: registro.usuarioDestino,
-                //     sumilla: registro.sumilla,
-                //     sumillado: "S"
-                // }
                 cambio.push(registro);
                 setSumillas(cambio);
             }else{
@@ -236,12 +202,9 @@ const Oficio = () => {
     const updateSumilla = async (registro) =>{
         try {
             let response  = await fetch(`${servidorAPI}sumilla`, {method: "put", headers: {'Content-Type':'application/json'}, body: JSON.stringify(registro)});
-            const data = await response.json();
             if (response.status === 201){
                 let cambio = [...sumillas];
-                console.log("a cambiar", cambio);
-                console.log("nuevo", cambio);
-                cambio = cambio.map( item => item.sumiIdSecRegistro == registro.idSecRegistro ? {...item, sumilla: registro.sumilla, sumiEstadoUsuarios: registro.estadoUsuarios}:item);
+                cambio = cambio.map( item => item.sumiIdSecRegistro === registro.sumiIdSecRegistro ? registro:item);
                 setSumillas(cambio);
             }
         } catch (error) {
@@ -259,7 +222,7 @@ const Oficio = () => {
             const data = await response.json();
             if (response.status === 201){
                 let cambio = [...sumillas];
-                let nuevas = cambio.filter(item => item.sumiIdSecRegistro!= pid);
+                let nuevas = cambio.filter(item => item.sumiIdSecRegistro !== pid);
                 setSumillas(nuevas);
             }else{
                 throw new Error (`[${data.error}]`)
@@ -274,17 +237,9 @@ const Oficio = () => {
     }
 
     const editarSumilla = (item) => {
-        console.log('editar', item);
-        setEdicionSumilla(true);
-        //setSumillaPresionada(item);
+        setNuevaSumilla(false);
         setVisAgregaSumilla(true);
-        setSumillaAEditar(item.sumiIdSecRegistro);
-        // setUsuarioSeleccionado({
-        //     idUsuario: item.usuario, 
-        //     usuario: item.empleado, 
-        //     departamentoId: item.corrIdDepartamento, 
-        //     departamento:item.departamento
-        // })
+        setSumillaActual({...item});
         frmAgregaSumilla.setFieldsValue({'txtUsuario':item.sumiUsuarioDestino})
         frmAgregaSumilla.setFieldsValue({'txtDepartamento':item.sumiDptoDestino})
         frmAgregaSumilla.setFieldsValue({'txtSumilla':item.sumilla})
@@ -298,7 +253,6 @@ const Oficio = () => {
             .then(async response => {
                 let resultado = await response.json();
                 if (response.status === 201){
-                    console.log("encontrados", resultado.data);
                     let options = await resultado.data.map(item => ({value: `${item.id}${item.empleado}`, 
                     label:
                     <div>
@@ -315,25 +269,49 @@ const Oficio = () => {
 
     const seleccionarCliente = async(value, options) => {
         console.log("seleccionado", options);
-        setUsuarioSeleccionado({
-            idUsuario: options.data.usuario, 
-            usuario: options.data.empleado, 
-            departamentoId: options.data.departamentoId, 
-            departamento:options.data.departamento
+        setSumillaActual({...sumillaActual,
+            sumiIdUsuarioDestino: options.data.usuario,
+            sumiUsuarioDestino: options.data.empleado,
+            sumiIdDpto: options.data.departamentoId,
+            sumiDptoDestino: options.data.departamento
         })
-
         frmAgregaSumilla.setFieldsValue({'txtDepartamento':options.data.departamento});
         frmAgregaSumilla.setFieldsValue({'txtUsuario':options.data.empleado});
-        //this.formRef.current.setFieldsValue({txtContratista: options.data.nomComercial?options.data.nomComercial:`${options.data.apellido} ${options.data.nombre}`, txtContratistaEmail: options.data.email});
     }
 
 
     return (
-        <Card title="Oficio">
+        <Card title="Oficio"
+              size="small"
+              extra={<Link to={{pathname: `/oficios`, filtro:location?.filtro}}><Button icon={<IoArrowBackOutline style={{marginTop:'2px'}} />} size="small" ><span>Regresar</span></Button></Link>}
+        >
             <Skeleton loading={loading}>
+            <Form form={frmOficio} layout="horizontal">
             <Row>
-                <Col span={16}>
-                    <Descriptions bordered size="small">
+                <Col span={18}>
+                    <Row>
+                        <Col span={12}>
+                            <Form.Item label="Registro" name="txtRegistro" labelCol={{span: 6}}>
+                            <Input disabled prefix={<IoChevronForwardCircleOutline/>}></Input>
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item label="Oficio" name="txtOficio" labelCol={{span: 6}}>
+                            <Input disabled prefix={<IoDocumentTextOutline></IoDocumentTextOutline>}></Input>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Form.Item label="Remitente" name="txtRemitente" labelCol={{span: 3}}>
+                            <Input disabled prefix={oficio?.tipoDocumento === 'I'? <IoPersonOutline/> : <IoMailOutline></IoMailOutline>}></Input>
+                    </Form.Item>
+                    <Form.Item label="Destinatario" name="txtDestinatario" labelCol={{span: 3}}>
+                            <Input disabled prefix={<IoPersonCircleOutline/>}></Input>
+                    </Form.Item>
+                    <Form.Item label="Asunto" name="txtAsunto" labelCol={{span: 3}}>
+                        <TextArea style={{backgroundColor:"#daedff", border:"1px solid #afd8ff", color:"black"}} disabled rows="3" ></TextArea>
+                    </Form.Item>
+
+                    {/* <Descriptions bordered size="small">
                         <Descriptions.Item label="Registro" span={3}>{`${oficio?.anio} - ${oficio?.registroDpto}`} </Descriptions.Item>
                         <Descriptions.Item label="Oficio" span={3}>{`${oficio?.tipoOficio} - ${oficio?.anio} - ${oficio?.digitos}`} </Descriptions.Item>
                         <Descriptions.Item label="Remitente" span={3}>
@@ -346,14 +324,26 @@ const Oficio = () => {
                         <Descriptions.Item label="Destinatario" span={3}>{oficio?.usuarioDestino} </Descriptions.Item>
                         <Descriptions.Item label="Asunto" span={3}><TextArea style={{backgroundColor:"#daedff", border:"1px solid #afd8ff", color:"black"}} disabled rows="3" value={oficio?.asunto}></TextArea> </Descriptions.Item>
                         <Descriptions.Item label="Observacion" span={3}><TextArea style={{backgroundColor:"white", border:"1px solid #afd8ff", color:"black"}} disabled rows="2" value={oficio?.observacion}></TextArea> </Descriptions.Item>
-                    </Descriptions>
+                    </Descriptions> */}
                 </Col>
-                <Col span={8}>
+                <Col span={6}>
                 <Descriptions bordered size="small">
                         <Descriptions.Item label="Ingresado :" span={3}>{`${oficio?.usuario}`} </Descriptions.Item>
                         <Descriptions.Item label="Fecha ingreso:" span={3}>{`${moment(oficio?.fechaIngreso).format("DD/MM/YYYY")}`} </Descriptions.Item>
-                    </Descriptions>
+                </Descriptions>
                 </Col>
+            </Row>
+            </Form>
+            <Row>
+                <Col span={18}>
+                <Form.Item label="Observacion" name="txtObservacion" labelCol={{span: 3}}>
+                    <TextArea style={{backgroundColor:"white", border:"1px solid #afd8ff", color:"black"}} disabled rows="2" ></TextArea>
+                    </Form.Item>
+
+                </Col>
+                <Col span={6}>
+                </Col>
+
             </Row>
             <Row>
                 <Col span={24}>
@@ -395,25 +385,20 @@ const Oficio = () => {
                                         rowData => {return(
                                             <div>
                                                 <div> 
-                                                    {/* <FontAwesomeIcon icon={faShare} style={{size:"10px",  marginRight:"5px", color:"#a97817"}}></FontAwesomeIcon> */}
                                                     <IoArrowRedoOutline style={{size:"10px",  marginRight:"5px", color:"#a97817"}}></IoArrowRedoOutline>
                                                     {`${rowData.sumilla} `}
                                                 </div>
                                                 {rowData.registroContesta &&
                                                 <div style={{fontSize:'11px', color:"#004c9e", marginTop:"8px",  marginLeft:"15px", borderTop:"1px dotted #c0d5ec" }}>
                                                     <div >
-                                                        {/* <FontAwesomeIcon icon={faReply} style={{size:"10px",  marginRight:"5px"}}></FontAwesomeIcon> */}
                                                         <IoArrowUndoOutline style={{size:"10px",  marginRight:"5px"}}/>
                                                         <span >
                                                         {`Contesta: ${rowData.registroContesta}`}  
                                                         </span>
-                                                        {/* <FontAwesomeIcon icon={faCalendar} style={{size:"10px", marginLeft:"15px",  marginRight:"5px"}}></FontAwesomeIcon> */}
                                                         <IoCalendarClearOutline style={{fontSize:"12px", marginLeft:"15px",  marginRight:"5px"}}/>
                                                         {moment(rowData.sumiFechaContesta).format('DD/MM/YYYY')}
-                                                        {/* <FontAwesomeIcon icon={faCopy} style={{size:"10px",  marginLeft:"15px", marginRight:"5px"}}></FontAwesomeIcon> */}
                                                         <IoDocumentTextOutline style={{fontSize:"12px", marginLeft:"15px", marginRight:"5px"}}/>
                                                         {`${rowData.oficioContesta} - ${rowData.anioContesta} - ${rowData.digitosContesta}`}
-
                                                     </div>
                                                     <div>
                                                     </div>
@@ -426,25 +411,6 @@ const Oficio = () => {
                                         )}
                                     }
                                 />
-                                {/* <Column title="Contestación"  width={250}  
-                                    render={
-                                        rowData => {return(
-                                            rowData.registroContesta &&
-                                            <div>
-                                                <span > 
-                                                            {`${rowData.contestacion ? rowData.contestacion : ''  } `}
-                                                </span>
-                                                <div style={{fontSize:'11px', color:"#096dd9" }}>
-                                                    <FontAwesomeIcon icon={faReply} style={{size:"10px",  marginRight:"5px"}}></FontAwesomeIcon>
-                                                    <span >
-                                                    {`Contesta: ${rowData.registroContesta} con fecha ${moment(rowData.sumiFechaContesta).format('DD/MM/YYYY')}`}
-                                                    </span>
-                                                </div>
-
-                                            </div>
-                                        )}
-                                    }
-                                /> */}
                                 <Column title="Estado"  width={50}  
                                     render={
                                         rowData => { 
@@ -519,11 +485,12 @@ const Oficio = () => {
                 onCancel={() => {console.log("cancelar");setVisAgregaSumilla(false)}}
                 onOk={() => aceptarSumilla()}
                 width={800}
+                forceRender
             >
                 <Form layout="vertical" form={frmAgregaSumilla}>
                     <Row>
                         <Col span={18}>
-                            <Form.Item label="Usuario" name="txtUsuario"
+                            <Form.Item label="Usuario" name="txtUsuario" 
                             rules={[{required:true, message:"Ingrese un usuario"}]}
                             >
                                 <AutoComplete
@@ -532,9 +499,8 @@ const Oficio = () => {
                                 options={clientesFiltrados}
                                 notFoundContent={<Spin/>}
                                 onSelect={(value, options) => seleccionarCliente(value, options)}
-                                onChange={(valor) =>{ setValBuscarCliente(valor)  }}
                                 style={{width: "100%"}}
-                                disabled={edicionSumilla}
+                                disabled={!nuevaSumilla}
                                 >
                                 <Input prefix={<IoPersonOutline></IoPersonOutline>}></Input>
                                 </AutoComplete>
@@ -548,8 +514,7 @@ const Oficio = () => {
                         <Col span={6}>
                             <div style={{marginLeft:"20px"}}>
                             <Descriptions layout="vertical">
-                                <Descriptions.Item span={3} label="Usuario">PGARCIA</Descriptions.Item>
-                                <Descriptions.Item span={3} label="Ingresado">{moment().format("DD/MM/YYYY")}</Descriptions.Item>
+                                <Descriptions.Item span={3} label="Ingresado">{moment(sumillaActual.fechaSumilla).format("DD/MM/YYYY")}</Descriptions.Item>
                             </Descriptions>
                             </div>
                         </Col>

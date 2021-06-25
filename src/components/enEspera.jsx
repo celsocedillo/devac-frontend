@@ -1,16 +1,13 @@
 import React, {useState, useEffect}  from "react";
 import { Link } from "react-router-dom";
 import moment from 'moment';
-import NumberFormat from "react-number-format";
-
-import ModalOficio from './modalOficio';
-import { Row, Col, Card, Table, Tag, Button, notification, Avatar, Popover, Badge, Space } from 'antd';
+import { Row, Col, Card, Table, notification, Avatar, Popover, Badge } from 'antd';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faShareSquare, faSearchPlus, faEllipsisH, faUser, faCity, faSignInAlt, faReply } from '@fortawesome/free-solid-svg-icons';
+import { faSearchPlus, faEllipsisH } from '@fortawesome/free-solid-svg-icons';
 
 require('dotenv').config();
 
-function Oficios2(){
+function EnEspera(){
 
     const servidorAPI = process.env.REACT_APP_API_URL;
 
@@ -18,16 +15,14 @@ function Oficios2(){
 
     const [lista, setLista] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [divFiltro, setDivFiltro] = useState(null);
     const [demorados, setDemorados] = useState(0);
     const [enEspera, setEnEspera] = useState();
-    const [showModalOficio, setShowModalOficio] = useState(false);
 
     useEffect(() => {
         async function obtenerData()  {
             setLoading(true);
             try {           
-                const response = await fetch(`${servidorAPI}ultimoOficios`);
+                const response = await fetch(`${servidorAPI}oficiosEnEspera`);
                 const data = (await response.json());
                 if (response.status === 201){
                     setLista(data.data);
@@ -41,7 +36,7 @@ function Oficios2(){
             } catch (error) {
                 notification['error']({
                     message: 'Error',
-                    description: `Error al cargar los oficios ${error}`
+                    description: `Error al cargar los contratos ${error}`
                   });    
             }
        }
@@ -49,34 +44,47 @@ function Oficios2(){
        obtenerData();
     }, []);
 
-    const closeModalOficio =  async (show) => {
-        setShowModalOficio(show);
-    }
     
     return(
         <Card title="Lista de oficios">
+            <Row style={{backgroundColor:"#ececec"}}>
+                <Col span={2} style={{textAlign:"center"}}>
+                    <Card>
+                        <div>
+                        <Badge count={lista?.length} style={{backgroundColor: "#40a9ff"}}>
+                        </Badge>
+                        </div>
+                        Sumillas
+                    </Card>
+                </Col>
+                <Col span={2} style={{textAlign:"center"}}>
+                    <Card>
+                        <div>
+                        <Badge count={demorados}>
+                        </Badge>
+                        </div>
+                        Demorados
+                    </Card>
+                </Col>
+                <Col span={2} style={{textAlign:"center"}} >
+                    <Card>
+                    <div>
+                        <Badge count={enEspera} style={{backgroundColor: "green"}}>
+                        </Badge>
+                        </div>
+                        En espera
+                    </Card>
+                </Col>
+            </Row>
+
             <Table dataSource={lista} size="small" pagination={false} loading={loading} rowKey="id" > 
-            <Column title="Año" dataIndex="anio" key="anio" />
-            <Column title="Registro" dataIndex="registroDpto" key="registroDpto"  />
-            <Column title="Fecha" key="fechaIngreso" 
+            <Column title="Id" dataIndex="id" key="id" width={20} />
+            <Column title="Año" dataIndex="anio" key="anio" width={30} />
+            <Column title="Registro" dataIndex="registroDepartamento" key="registroDepartamento" width={30} />
+            <Column title="Fecha" key="fechaIngreso" width={30} 
                 sorter={(a, b) => moment(a.fechaIngreso).unix() - moment(b.fechaIngreso).unix()}
                 render={rowData => (moment(rowData.fechaIngreso).format("DD/MM/YYYY"))}/>
-            <Column title="Remitente" key="usuarioOrigen" width={220}
-                    render={rowData => {
-                        return(
-                            <div>
-                                {rowData.tipoDocumento === "I" ? <div><FontAwesomeIcon style={{color:"#faad14"}}  icon={faUser}/> {` ${rowData.usuarioOrigen}`}</div>
-                                : <div><FontAwesomeIcon style={{color:"purple"}} icon={faSignInAlt}/> {` ${rowData.usuarioOrigen} - ${rowData.dptoOrigen}`}</div>
-                                }
-                                
-                                
-                            </div>
-                        )
-                    }}
-            />                
-            <Column title="Oficio"  
-                render={rowData => (`${rowData.tipoOficio}-${rowData.anio}-${rowData.digitos}`)}/>
-            <Column title="Asunto"  
+            <Column title="Asunto" width={80} 
                 render={rowData => { return(
                 <div>
                     <span style={{whiteSpace:"nowrap"}}> 
@@ -92,6 +100,12 @@ function Oficios2(){
                         :rowData.asunto}                            
                     </span>
                     <div style={{fontSize:"11px"}}>
+                        <span style={{color:"gray"}}>
+                            Remitente: 
+                        </span>
+                        <span style={{color:"#629db1"}}>
+                            {`${rowData.usuarioOrigen}, `}
+                        </span>
                         <span style={{color:"#5a9e5a"}}>
                             {rowData.departamentoOrigen}
                         </span>
@@ -99,39 +113,7 @@ function Oficios2(){
                 </div>
             )}}
             />
-            <Column title="Sumillas" 
-                render={rowData => {return(
-                    <div>
-                        {rowData.sumillas > 0 && <Badge offset={[3,10]} size="small" style={{backgroundColor:"green", fontSize: "11px"}} count={rowData.sumillas} >
-                                                <FontAwesomeIcon style={{width:"15px", height:"15px"}} icon={faShareSquare} />
-                                                </Badge>
-                                         
-                        }
-                    </div>
-                )}}
-            />
-            <Column title="Resp" 
-                render={rowData => {return(
-                    <div>
-                        {rowData.contestacion > 0 && 
-                                                <FontAwesomeIcon style={{width:"15px", height:"15px", color:"#096dd9"}} icon={faReply} />
-                                         
-                        }
-                    </div>
-                )}}
-            />
-            <Column title="" width={35} align="center" 
-                     render={ rowData => 
-                       <Link to={
-                                {
-                                pathname: `/oficio/${rowData.id}`
-                                }}
-                       ><FontAwesomeIcon icon={faSearchPlus}></FontAwesomeIcon>
-                       </Link> 
-                     }>
-            </Column>
-
-            {/* <Column title="FechaSumilla" key="fechaSumilla" width={30} 
+            <Column title="FechaSumilla" key="fechaSumilla" width={30} 
                 sorter={(a, b) => moment(a.fechaSumilla).unix() - moment(b.fechaSumilla).unix()}
                 render={rowData => (moment(rowData.fechaSumilla).format("DD/MM/YYYY"))}/>
 
@@ -144,9 +126,9 @@ function Oficios2(){
                         </Avatar> 
                     </div>
                 )}}
-            /> */}
+            />
 
-            {/* <Column title="Sumillado" 
+            <Column title="Sumillado" 
                 render={rowData => {return(
                     <div>
                         {rowData.sumillaUsuarioDestino}
@@ -172,19 +154,42 @@ function Oficios2(){
                         </div>
                     )}
                 }
-            /> */}
-            {/* <Column title="Espera" width={30} 
+            />
+            <Column title="Espera" width={30} 
             sorter={(a, b) => a.diasEspera - b.diasEspera}
             render={rowData => {
                 return(
-                    rowData.diasEspera >= 7 ?
+                    rowData.diasEspera >= 5 ?
                     <Badge count={rowData.diasEspera} style={{backgroundColor:"red"}} overflowCount="999"></Badge>
                     :
                     <Badge count={rowData.diasEspera} style={{backgroundColor:"green"}}></Badge>
                 )
             }}
             />                    
- */}
+
+            <Column title="" width={35} align="center" 
+                     render={ rowData => 
+                       <Link to={
+                                {
+                                pathname: `/oficio/${rowData.id}`
+                                }}
+                       ><FontAwesomeIcon icon={faSearchPlus}></FontAwesomeIcon>
+                       </Link> 
+                     }>
+            </Column>
+            {/* <Column title="Estado" key="estado" width={50} sorter={(a, b) => a.estado.localeCompare(b.estado)} 
+                onFilter= {(value, record) => record.estado.indexOf(value) === 0}
+                render={rowData => {
+                return(
+                    (
+                        rowData.sumillaEstado === "S" ?
+                        <Tag  color="red" style={{fontSize: '11px', lineHeight: '15px'}} >En espera</Tag>
+                        :
+                        <Tag style={{fontSize: '11px', lineHeight: '15px'}} >Ingesado</Tag>
+                    )
+                    )
+                }
+            }/> */}
        </Table>                 
 
 
@@ -194,4 +199,4 @@ function Oficios2(){
 
 };
 
-export default Oficios2;
+export default EnEspera;
