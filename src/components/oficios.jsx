@@ -51,6 +51,7 @@ function Oficios2(){
                   });    
             }
        }
+
        if (location.filtro)  {
            setLista(JSON.parse(window.localStorage.getItem('filtrado')));
            setMensaje(window.localStorage.getItem('msgFiltro'));
@@ -96,7 +97,6 @@ function Oficios2(){
                 frmFiltro.getFieldValue('txtRemitente') || 
                 frmFiltro.getFieldValue('txtAsunto') ||
                 frmFiltro.getFieldValue('txtOficio')) {
-                
                 let filtro = '';
                 frmFiltro.getFieldValue('txtFecha')?.inicio && (filtro = `${filtro}fechaDesde=${frmFiltro.getFieldValue('txtFecha')?.inicio}`)
                 frmFiltro.getFieldValue('txtFecha')?.fin && (filtro = `${filtro}&fechaHasta=${frmFiltro.getFieldValue('txtFecha')?.fin}`)                 
