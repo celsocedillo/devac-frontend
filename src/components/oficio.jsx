@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { IoArrowRedoOutline, IoArrowUndoOutline, IoCalendarClearOutline, IoDocumentTextOutline, 
          IoPersonOutline, IoExitOutline, IoTrashOutline, IoPencil, IoChevronForwardCircleOutline,
-         IoMailOutline, IoPersonCircleOutline, IoArrowBackCircleOutline, IoArrowBackOutline } from 'react-icons/io5'
+         IoMailOutline, IoPersonCircleOutline,  IoArrowBackOutline } from 'react-icons/io5'
 import { HiOutlineOfficeBuilding } from 'react-icons/hi';
 import TextArea from "antd/lib/input/TextArea";
 import moment from 'moment';
@@ -60,7 +60,6 @@ const Oficio = (props) => {
     const {TabPane} = Tabs;
 
     useEffect( () => {
-        console.log("location", location);
         obtenerOficio();
         obtenerDepartamentos();
         obtenerEstadoUsuarios();

@@ -1,40 +1,21 @@
 
 import './App.css';
-import React, { Fragment } from 'react';
-
-import Cabecera from './components/layouts/cabecera'
+import React from 'react';
+import {  BrowserRouter as Router} from "react-router-dom";
 import { Layout } from 'antd';
-import {  BrowserRouter as Router, Switch, Route} from "react-router-dom";
-import EnEspera from './components/enEspera';
-import  Oficio  from './components/oficio';
-import  Oficios  from './components/oficios';
-
-const { Content } = Layout;
+import {UserProvider}  from './contexts/userContext';
+import  Contenedor from "./components/contenedor";
 
 function App() {
+  
   return (
-    <Fragment>
-      
-    <Router>
-      
+      <UserProvider>
+        <Router>
+        <Contenedor>
+        </Contenedor>
+        </Router>
+      </UserProvider>
         
-          <Layout>
-            <Cabecera/>
-            <Content>
-            <Switch>
-              <Route exact path="/enEspera" component={EnEspera} />
-              <Route exact path="/oficio/:id" >
-                <Oficio/>
-              </Route>
-              <Route exact path="/oficios" >
-                <Oficios/>
-              </Route>
-              </Switch>              
-            </Content>
-          </Layout>
-      
-    </Router>
-    </Fragment>
   );
 }
 

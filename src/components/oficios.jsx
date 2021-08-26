@@ -29,13 +29,19 @@ function Oficios2(){
     const [frmFiltro]  = Form.useForm();
     const refBusAnio = useRef(null);
 
+    const fetchHeader = {
+        'Authorization': `Bearer ${window.localStorage.getItem('sesionToken')}`  ,
+        'Content-Type': 'application/json'
+    }
+
+
     useEffect(() => {
         frmBuscar.setFieldsValue({'txtBusAnio': moment().year()})
         async function obtenerData()  {
             setLoading(true);
             try {           
                 let filtro=`fechaDesde=${moment().subtract(45, 'days')}&fechaHasta=${moment()}`
-                const response = await fetch(`${servidorAPI}oficiosByFiltro/0/0/?${filtro}`);
+                const response = await fetch(`${servidorAPI}oficiosByFiltro/0/0/?${filtro}`, {method:'GET', headers:fetchHeader});
                 const data = (await response.json());
                 if (response.status === 201){
                     setLista(data.data);
@@ -73,7 +79,7 @@ function Oficios2(){
     const clickBuscar = async () =>{
         if (frmBuscar.getFieldValue('txtBusRegistro').length > 0){
             try {           
-                const response = await fetch(`${servidorAPI}oficiosByFiltro/${frmBuscar.getFieldValue('txtBusAnio')}/${frmBuscar.getFieldValue('txtBusRegistro')}`);
+                const response = await fetch(`${servidorAPI}oficiosByFiltro/${frmBuscar.getFieldValue('txtBusAnio')}/${frmBuscar.getFieldValue('txtBusRegistro')}`, {method:'GET', headers:fetchHeader});
                 const data = (await response.json());
                 if (response.status === 201){
                     console.log('datos', data.data);
@@ -105,7 +111,7 @@ function Oficios2(){
                 frmFiltro.getFieldValue('txtOficio') && (filtro = `${filtro}&oficio=${frmFiltro.getFieldValue('txtOficio')}`)                 
                 console.log("filtro", filtro);
                 setLoading(true);
-                const response = await fetch(`${servidorAPI}oficiosByFiltro/0/0/?${filtro}`);
+                const response = await fetch(`${servidorAPI}oficiosByFiltro/0/0/?${filtro}`, {method:'GET', headers:fetchHeader});
                 const data = (await response.json());
                 if (response.status === 201){
                     console.log('datos', data.data);
