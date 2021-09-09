@@ -1,4 +1,4 @@
-import React, {useState, useEffect}  from "react";
+import React, {useState, useEffect, useContext}  from "react";
 import {  Link, useLocation, useParams } from "react-router-dom";
 import { Row, Col, Card, Table, Tag, Button, notification, Badge, Space, Descriptions,  
          Tabs, Tooltip, Form, Input, Modal, Select, AutoComplete, Spin, Popconfirm,
@@ -11,6 +11,7 @@ import { IoArrowRedoOutline, IoArrowUndoOutline, IoCalendarClearOutline, IoDocum
 import { HiOutlineOfficeBuilding } from 'react-icons/hi';
 import TextArea from "antd/lib/input/TextArea";
 import moment from 'moment';
+import UserContext from "../../contexts/userContext";
 
 
 
@@ -55,23 +56,26 @@ const Oficio = (props) => {
     const [frmOficio]  = Form.useForm();
     const params = useParams();
     const location = useLocation();
+    const {usuario, apiHeader} = useContext(UserContext);
 
     const { Column } = Table;
     const {TabPane} = Tabs;
 
     useEffect( () => {
-        obtenerOficio();
-        obtenerDepartamentos();
-        obtenerEstadoUsuarios();
-    }, [])
+        async function data() {
+            await obtenerOficio();
+            await obtenerDepartamentos();
+            await obtenerEstadoUsuarios();
+        } 
+        apiHeader && data();
+    }, [usuario])
 
     const obtenerOficio = async () => {
         try {           
             setLoading(true);
-            const response = await fetch(`${servidorAPI}oficio/${params.id}`);
+            const response = await fetch(`${servidorAPI}oficio/${params.id}`, {method: 'GET', headers: apiHeader});
             const data = (await response.json());
             if (response.status === 201){
-                console.log("oficio", data.data);
                 setOficio(data.data);
                 llenaFormulario(data.data);
             }else{
@@ -80,6 +84,7 @@ const Oficio = (props) => {
             setLoading(false);
             setSumillas(data.data.sumillas);
         } catch (error) {
+            console.log('Error', error);
             notification['error']({
                 message: 'Error',
                 description: `Error al cargar los oficios ${error}`
@@ -89,10 +94,9 @@ const Oficio = (props) => {
 
     const obtenerDepartamentos = async () => {
         try {
-            const response = await fetch(`${servidorAPI}departamentos`);
+            const response = await fetch(`${servidorAPI}departamentos`, {method: 'GET', headers: apiHeader});
             const data = (await response.json());
             if (response.status === 201){
-                console.log("departamentos", data.data);
                 setDepartamentos(data.data);
             }else{
                 throw new Error (`[${data.error}]`)                    
@@ -108,10 +112,9 @@ const Oficio = (props) => {
 
     const obtenerEstadoUsuarios = async () => {
         try {
-            const response = await fetch(`${servidorAPI}estadoUsuarios`);
+            const response = await fetch(`${servidorAPI}estadoUsuarios`, {method: 'GET', headers: apiHeader});
             const data = (await response.json());
             if (response.status === 201){
-                console.log("estados", data.data);
                 setEstadoUsuarios(data.data);
             }else{
                 throw new Error (`[${data.error}]`)                    
@@ -248,7 +251,7 @@ const Oficio = (props) => {
     const buscarCliente =  async (buscar) => {
         frmAgregaSumilla.setFieldsValue({'txtDepartamento':''});
         await fetch(
-            `${servidorAPI}filtroUsuarios/` + buscar.toUpperCase())
+            `${servidorAPI}filtroUsuarios/` + buscar.toUpperCase(),  {method: 'GET', headers: apiHeader})
             .then(async response => {
                 let resultado = await response.json();
                 if (response.status === 201){
@@ -282,7 +285,7 @@ const Oficio = (props) => {
     return (
         <Card title="Oficio"
               size="small"
-              extra={<Link to={{pathname: `/oficios`, filtro:location?.filtro}}><Button icon={<IoArrowBackOutline style={{marginTop:'2px'}} />} size="small" ><span>Regresar</span></Button></Link>}
+              extra={<Link to={{pathname: `/correspondencia/oficios`, filtro:location?.filtro, pagina:location?.pagina}}><Button icon={<IoArrowBackOutline style={{marginTop:'2px'}} />} size="small" ><span>Regresar</span></Button></Link>}
         >
             <Skeleton loading={loading}>
             <Form form={frmOficio} layout="horizontal">
@@ -332,7 +335,6 @@ const Oficio = (props) => {
                 </Descriptions>
                 </Col>
             </Row>
-            </Form>
             <Row>
                 <Col span={18}>
                 <Form.Item label="Observacion" name="txtObservacion" labelCol={{span: 3}}>
@@ -344,7 +346,8 @@ const Oficio = (props) => {
                 </Col>
 
             </Row>
-            <Row>
+            </Form>
+           <Row>
                 <Col span={24}>
                 <Tabs defaultActiveKey="1" type="card" size="small">
                     <TabPane tab="Sumillas" key="1">

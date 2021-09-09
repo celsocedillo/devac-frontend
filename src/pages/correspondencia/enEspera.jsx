@@ -1,21 +1,19 @@
 import React, {useState, useEffect, useContext}  from "react";
-import { Link } from "react-router-dom";
 import moment from 'moment';
 import { Row, Col, Card, Table, notification, Avatar, Popover, Badge, Drawer, Button, Form, Input, Descriptions, Tag, Divider } from 'antd';
 import TextArea from "antd/lib/input/TextArea";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSearchPlus, faEllipsisH } from '@fortawesome/free-solid-svg-icons';
 import { IoArrowRedoOutline, IoArrowUndoOutline, IoCalendarClearOutline, IoDocumentTextOutline, 
-    IoPersonOutline, IoExitOutline, IoTrashOutline, IoPencil, IoChevronForwardCircleOutline,
-    IoMailOutline, IoPersonCircleOutline,  IoArrowBackOutline } from 'react-icons/io5'
+    IoPersonOutline, IoChevronForwardCircleOutline,
+    IoMailOutline, IoPersonCircleOutline } from 'react-icons/io5'
 
 
-import UserContext from "../contexts/userContext";
+import UserContext from "../../contexts/userContext";
 
 require('dotenv').config();
 
 function EnEspera(){
-    console.log('V En espera');
 
     const servidorAPI = process.env.REACT_APP_API_URL;
     const gerencia_direccion_id = process.env.GERENCIA_DIRECCION_ID;
@@ -35,14 +33,12 @@ function EnEspera(){
 
     const [frmOficio]  = Form.useForm();
     //const [fetchHeader, setFetchHeader] = useState();
+
     
     useEffect(() => {
     
         async function obtenerData()  {
             setLoading(true);
-            console.log('en espera usuario', usuario);
-            console.log('en espera header', apiHeader);
-            window.localStorage.getItem('sessionToken') === null && setTimeout(console.log('No existe'),0)
             try {           
                 //const response = await fetch(`${servidorAPI}oficiosEnEspera`);
                 //console.log('usuarioenespe', usuario);

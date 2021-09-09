@@ -1,10 +1,11 @@
-import React, {useState, useEffect, useRef}  from "react";
+import React, {useState, useEffect, useRef, useContext}  from "react";
 import { Link, useHistory, useLocation } from "react-router-dom";
 import moment from 'moment';
 import { Row, Col, Card, Table, Button, notification, Avatar, Popover, Badge, Input, Form, DatePicker, Alert } from 'antd';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {  faEllipsisH  } from '@fortawesome/free-solid-svg-icons';
 import { IoPersonOutline, IoMailOutline, IoArrowRedoOutline, IoArrowUndoOutline, IoFlashOutline, IoCalendarClearOutline, IoCaretForwardCircleOutline} from 'react-icons/io5'
+import UserContext from "../../contexts/userContext";
 
 
 require('dotenv').config();
@@ -18,58 +19,50 @@ function Oficios2(){
     let history = useHistory();
 
     const [lista, setLista] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [showBuscar, setShowBuscar] = useState(false);
     const [showFiltro, setShowFiltro] = useState(false);
     const [showMensaje, setShowMensaje] = useState(false);
     const [filtro, setFiltro] = useState(null);
     const [mensaje, setMensaje] = useState('');
 
+    const [paginacionManual] = useState(true);
+    const [paginaActual, setPaginaActual] = useState(1);
+    const [totalRows, setTotalRows] = useState(0);    
+
     const [frmBuscar]  = Form.useForm();
     const [frmFiltro]  = Form.useForm();
     const refBusAnio = useRef(null);
+    const {usuario, apiHeader} = useContext(UserContext);
 
-    const fetchHeader = {
-        'Authorization': `Bearer ${window.localStorage.getItem('sesionToken')}`  ,
-        'Content-Type': 'application/json'
-    }
-
+    frmBuscar.setFieldsValue({'txtBusAnio': moment().year()})
 
     useEffect(() => {
-        frmBuscar.setFieldsValue({'txtBusAnio': moment().year()})
-        async function obtenerData()  {
-            setLoading(true);
-            try {           
-                let filtro=`fechaDesde=${moment().subtract(45, 'days')}&fechaHasta=${moment()}`
-                const response = await fetch(`${servidorAPI}oficiosByFiltro/0/0/?${filtro}`, {method:'GET', headers:fetchHeader});
-                const data = (await response.json());
-                if (response.status === 201){
-                    setLista(data.data);
-                }else{
-                    throw new Error (`[${data.error}]`)                    
-                }            
-                setLoading(false);
-        
-            } catch (error) {
-                notification['error']({
-                    message: 'Error',
-                    description: `Error al cargar los oficios ${error}`
-                  });    
-            }
-       }
+        let pagina = 1;
 
-       if (location.filtro)  {
-           setLista(JSON.parse(window.localStorage.getItem('filtrado')));
+        async function obtenerData()  {
+            await obtenerOficios(0,0,null,pagina);
+        }
+
+       location?.pagina && (pagina = location?.pagina);
+
+       setPaginaActual(pagina)
+       if (location?.filtro)  {
+           //setLista(JSON.parse(window.localStorage.getItem('filtrado')));
+
+           obtenerOficios(0,0,location?.filtro,pagina);
            setMensaje(window.localStorage.getItem('msgFiltro'));
            setShowMensaje(true);
-           setLoading(false);
            setFiltro(window.localStorage.getItem('filtro'));
        } 
        else {
-           obtenerData();
-           setLoading(false);
+           if (usuario){
+               obtenerData();
+           }
        }
-    }, []);
+    }, [usuario]);
+
+    
 
     const openBusqueda = () => {
         setShowBuscar(true);        
@@ -77,17 +70,18 @@ function Oficios2(){
     }
 
     const clickBuscar = async () =>{
+        console.log('buscar');
         if (frmBuscar.getFieldValue('txtBusRegistro').length > 0){
             try {           
-                const response = await fetch(`${servidorAPI}oficiosByFiltro/${frmBuscar.getFieldValue('txtBusAnio')}/${frmBuscar.getFieldValue('txtBusRegistro')}`, {method:'GET', headers:fetchHeader});
+                const response = await fetch(`${servidorAPI}oficiosByFiltro/${frmBuscar.getFieldValue('txtBusAnio')}/${frmBuscar.getFieldValue('txtBusRegistro')}`, {method: 'GET', headers: apiHeader});
                 const data = (await response.json());
                 if (response.status === 201){
                     console.log('datos', data.data);
-                    data.data.length === 1 && history.push(`/oficio/${data.data[0].id}`);
+                    data.data.data.length === 1 && history.push(`/oficio/${data.data.data[0].id}`, {method: 'GET', headers: apiHeader});
                 }else{
                     throw new Error (`[${data.error}]`)                    
                 }            
-                setLoading(false);
+                //setLoading(false);
             } catch (error) {
                 notification['error']({
                     message: 'Error',
@@ -98,51 +92,67 @@ function Oficios2(){
     }
 
     const filtrar = async () => {
+        //Si hay valores en las cajas de texto
+        if (frmFiltro.getFieldValue('txtFecha') || 
+            frmFiltro.getFieldValue('txtRemitente') || 
+            frmFiltro.getFieldValue('txtAsunto') ||
+            frmFiltro.getFieldValue('txtOficio')
+            ) {
+            let filtro = '';
+            frmFiltro.getFieldValue('txtFecha')?.inicio && (filtro = `${filtro}fechaDesde=${frmFiltro.getFieldValue('txtFecha')?.inicio}`)
+            frmFiltro.getFieldValue('txtFecha')?.fin && (filtro = `${filtro}&fechaHasta=${frmFiltro.getFieldValue('txtFecha')?.fin}`)                 
+            frmFiltro.getFieldValue('txtRemitente') && (filtro = `${filtro}&remitente=${frmFiltro.getFieldValue('txtRemitente')}`)                 
+            frmFiltro.getFieldValue('txtAsunto') && (filtro = `${filtro}&asunto=${frmFiltro.getFieldValue('txtAsunto')}`)                 
+            frmFiltro.getFieldValue('txtOficio') && (filtro = `${filtro}&oficio=${frmFiltro.getFieldValue('txtOficio')}`)                 
+            //window.localStorage.setItem("filtrado", JSON.stringify(data.data.data));
+            let msg='';
+            //Buscar oficios por filtro
+            setPaginaActual(1);
+            obtenerOficios(0,0,filtro,1);
+            setFiltro(filtro);
+            setShowFiltro(!showFiltro);
+            frmFiltro.getFieldValue('txtFecha')?.inicio && (msg=`[${moment(frmFiltro.getFieldValue('txtFecha')?.inicio).format('DD-MM-YYYY')}]`)
+            frmFiltro.getFieldValue('txtFecha')?.fin && (msg=` ${msg} [${moment(frmFiltro.getFieldValue('txtFecha')?.fin).format('DD-MM-YYYY')}]`)
+            frmFiltro.getFieldValue('txtRemitente') && (msg=`${msg} [${frmFiltro.getFieldValue('txtRemitente')}]`)
+            frmFiltro.getFieldValue('txtAsunto') && (msg=`${msg} [${frmFiltro.getFieldValue('txtAsunto')}]`)
+            frmFiltro.getFieldValue('txtOficio') && (msg=`${msg} [${frmFiltro.getFieldValue('txtOficio')}]`)
+            setMensaje(`${msg} Se encontraron ${totalRows} registros`);
+            window.localStorage.setItem("msgFiltro", `${msg} Se encontraron ${totalRows} registros`);
+            window.localStorage.setItem("filtro", filtro);                    
+            setShowMensaje(true);
+        }
+    } 
+
+    const obtenerOficios = async(panio, pregistro, pfiltro, ppagina) => {
         try {
-            if (frmFiltro.getFieldValue('txtFecha') || 
-                frmFiltro.getFieldValue('txtRemitente') || 
-                frmFiltro.getFieldValue('txtAsunto') ||
-                frmFiltro.getFieldValue('txtOficio')) {
-                let filtro = '';
-                frmFiltro.getFieldValue('txtFecha')?.inicio && (filtro = `${filtro}fechaDesde=${frmFiltro.getFieldValue('txtFecha')?.inicio}`)
-                frmFiltro.getFieldValue('txtFecha')?.fin && (filtro = `${filtro}&fechaHasta=${frmFiltro.getFieldValue('txtFecha')?.fin}`)                 
-                frmFiltro.getFieldValue('txtRemitente') && (filtro = `${filtro}&remitente=${frmFiltro.getFieldValue('txtRemitente')}`)                 
-                frmFiltro.getFieldValue('txtAsunto') && (filtro = `${filtro}&asunto=${frmFiltro.getFieldValue('txtAsunto')}`)                 
-                frmFiltro.getFieldValue('txtOficio') && (filtro = `${filtro}&oficio=${frmFiltro.getFieldValue('txtOficio')}`)                 
-                console.log("filtro", filtro);
-                setLoading(true);
-                const response = await fetch(`${servidorAPI}oficiosByFiltro/0/0/?${filtro}`, {method:'GET', headers:fetchHeader});
-                const data = (await response.json());
-                if (response.status === 201){
-                    console.log('datos', data.data);
-                    window.localStorage.setItem("filtrado", JSON.stringify(data.data));
-                    let msg='';
-                    setFiltro(filtro);
-                    setLista(data.data);
-                    setLoading(false);
-                    setShowFiltro(!showFiltro);
-                    frmFiltro.getFieldValue('txtFecha')?.inicio && (msg=`[${moment(frmFiltro.getFieldValue('txtFecha')?.inicio).format('DD-MM-YYYY')}]`)
-                    frmFiltro.getFieldValue('txtFecha')?.fin && (msg=` ${msg} [${moment(frmFiltro.getFieldValue('txtFecha')?.fin).format('DD-MM-YYYY')}]`)
-                    frmFiltro.getFieldValue('txtRemitente') && (msg=`${msg} [${frmFiltro.getFieldValue('txtRemitente')}]`)
-                    frmFiltro.getFieldValue('txtAsunto') && (msg=`${msg} [${frmFiltro.getFieldValue('txtAsunto')}]`)
-                    frmFiltro.getFieldValue('txtOficio') && (msg=`${msg} [${frmFiltro.getFieldValue('txtOficio')}]`)
-                    setMensaje(`${msg} Se encontraron ${data.data.length} registros`);
-                    window.localStorage.setItem("msgFiltro", `${msg} Se encontraron ${data.data.length} registros`);
-                    window.localStorage.setItem("filtro", filtro);                    
-                    setShowMensaje(true);
-                }else{
-                    throw new Error (`[${data.error}]`)                    
-                }            
-                setLoading(false);
-             
-            }
+            setLoading(true);
+            const response = await fetch(`${servidorAPI}oficiosByFiltro/${panio}/${pregistro}/${ppagina}/?${pfiltro}`, {method: 'GET', headers: apiHeader});
+            const data = (await response.json());
+            if (response.status === 201){
+                setLista(data.data.data);
+                setTotalRows(data.data.totalRows);
+            }else{
+                throw new Error (`[${data.error}]`)                    
+            }            
+            setLoading(false);
         } catch (error) {
+            setLoading(false);
             notification['error']({
                 message: 'Error',
                 description: `Error al cargar los oficios ${error}`
-              });           
+              });                       
         }
+
     }
+
+    const handleTableChange = (pagination, filters, sorter) => {
+        //console.log('Various parameters', pagination, filters, sorter);
+        if (paginacionManual) {
+            setPaginaActual(pagination.current);
+            obtenerOficios(0,0,filtro,pagination.current);
+        }
+    };
+
     
     return(
         <Card title="Lista de oficios" size="small"
@@ -223,14 +233,17 @@ function Oficios2(){
             </Card>
             }
             {showMensaje && <Alert message={mensaje} type="success" visible={showMensaje} size="small"/>}
-            <Table dataSource={lista} size="small" loading={loading} rowKey="id" pagination={{defaultPageSize:20}} > 
+            <Table dataSource={lista} size="small" loading={loading} rowKey="id" 
+            pagination={ paginacionManual ? {current: paginaActual,total: totalRows, showSizeChanger: false, pageSize: 20} : {pagination: true}} 
+            onChange={handleTableChange}> 
             <Column title="Año" dataIndex="anio" key="anio" />
             <Column title="Registro" key="registroDpto"
                 render={rowData => 
                     <Link to={
                         {
-                        pathname: `/oficio/${rowData.id}`,
-                        filtro: filtro
+                        pathname: `/correspondencia/oficio/${rowData.id}`,
+                        filtro: filtro,
+                        pagina: paginaActual
                         }}
                >{rowData.registroDpto}
                </Link> 

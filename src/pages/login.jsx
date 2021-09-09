@@ -1,4 +1,5 @@
 import React, {useContext} from 'react'
+import { useHistory } from "react-router-dom";
 import { Form, Input, Button, Row, Col } from 'antd';
 import { IoPersonOutline } from 'react-icons/io5'
 import UserContext from '../contexts/userContext';
@@ -6,16 +7,14 @@ import UserContext from '../contexts/userContext';
 
 const Login = () => {
     
-    console.log('V Login');
 
     const [frmLogin]  = Form.useForm();
     const { login } = useContext(UserContext);
+    const history = useHistory();
 
-    const handleLogin = async () =>{
-        console.log('1');
-        await login(frmLogin.getFieldValue('txtLogin'), frmLogin.getFieldValue('txtPassword'))       
-        setTimeout(()=>{}, 0);
-        console.log('2', window.localStorage.getItem('sesionToken'));
+    const handleLogin = async (e) =>{
+        const userData = await login(frmLogin.getFieldValue('txtLogin'), frmLogin.getFieldValue('txtPassword'));
+        userData && history.push('/listaModulos');
     }
 
     return (
