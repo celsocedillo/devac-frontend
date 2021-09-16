@@ -182,7 +182,7 @@ const Oficio = (props) => {
 
     const insertaSumilla = async (registro) => {
         try {
-            let response  = await fetch(`${servidorAPI}sumilla`, {method: "post", headers: {'Content-Type':'application/json'}, body: JSON.stringify(registro)});
+            let response  = await fetch(`${servidorAPI}sumilla`, {method: "post", headers: apiHeader, body: JSON.stringify(registro)});
             const data = await response.json();
             if (response.status === 201){
                 let cambio = [...sumillas];
@@ -203,7 +203,8 @@ const Oficio = (props) => {
 
     const updateSumilla = async (registro) =>{
         try {
-            let response  = await fetch(`${servidorAPI}sumilla`, {method: "put", headers: {'Content-Type':'application/json'}, body: JSON.stringify(registro)});
+            //let response  = await fetch(`${servidorAPI}sumilla`, {method: "put", headers: {'Content-Type':'application/json'}, body: JSON.stringify(registro)});
+            let response  = await fetch(`${servidorAPI}sumilla`, {method: "put", headers: apiHeader, body: JSON.stringify(registro)});
             if (response.status === 201){
                 let cambio = [...sumillas];
                 cambio = cambio.map( item => item.sumiIdSecRegistro === registro.sumiIdSecRegistro ? registro:item);
@@ -220,7 +221,7 @@ const Oficio = (props) => {
     const deleteSumilla = async (pid) =>{
         try {
             setConfirmBorrar(true);
-            let response  = await fetch(`${servidorAPI}sumilla/${pid}`, {method: "delete", headers: {'Content-Type':'application/json'}});
+            let response  = await fetch(`${servidorAPI}sumilla/${pid}`, {method: "delete", headers: apiHeader});
             const data = await response.json();
             if (response.status === 201){
                 let cambio = [...sumillas];

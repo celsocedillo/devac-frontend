@@ -10,6 +10,7 @@ import { IoArrowRedoOutline, IoArrowUndoOutline, IoCalendarClearOutline, IoDocum
 
 
 import UserContext from "../../contexts/userContext";
+import OficioVista from "./components/OficioVista";
 
 require('dotenv').config();
 
@@ -33,6 +34,7 @@ function BandejaSumillas(){
     const [paginaActual, setPaginaActual] = useState(1);
     const [totalRows, setTotalRows] = useState(0);    
     const [estadoFiltroActual, setEstadoFiltroActual] = useState('T');
+    const [oficioId, setOficioId] = useState();
 
 
     const {usuario} = useContext(UserContext);
@@ -53,9 +55,9 @@ function BandejaSumillas(){
 
     }, [usuario]);
 
-    useEffect(()=>{
-        !enEspera && setEnEspera(lista?.filter(a => a.sumillaEstado ==='S').length)
-    }, [lista])
+    // useEffect(()=>{
+    //     !enEspera && setEnEspera(lista?.filter(a => a.sumillaEstado ==='S').length)
+    // }, [lista])
 
     const obtenerSumillas = async (xestado, pagina) => {
         try{
@@ -75,6 +77,8 @@ function BandejaSumillas(){
                         return null;
                     })
                     setNombreFiltro(nombres);
+                }else if(xestado === 'T'){
+                    setEnEspera(data.data.totalEnEspera);
                 }else {
                     setNombreFiltro([]);
                     setFiltroInfo(null);
@@ -92,24 +96,29 @@ function BandejaSumillas(){
     }
 
     const handleShowDetalle = async (id) => {
-        try {           
-            const response = await fetch(`${servidorAPI}oficio/${id}`, {method:'GET', headers: apiHeader});
-            const data = (await response.json());
-            if (response.status === 201){
-                console.log("oficio", data.data);
-                setOficio(data.data);
-                setShowDetalle(true);
-                llenaFormulario(data.data);
-            }else{
-                throw new Error (`[${data.error}]`)                    
-            }            
-            setSumillas(data.data.sumillas);
-        } catch (error) {
-            notification['error']({
-                message: 'Error',
-                description: `Error al cargar los oficios ${error}`
-              });    
-        }
+        console.log('al detalle', id);
+        setOficioId(id);
+        setShowDetalle(true);
+
+
+        // try {           
+        //     const response = await fetch(`${servidorAPI}oficio/${id}`, {method:'GET', headers: apiHeader});
+        //     const data = (await response.json());
+        //     if (response.status === 201){
+        //         console.log("oficio", data.data);
+        //         setOficio(data.data);
+        //         setShowDetalle(true);
+        //         llenaFormulario(data.data);
+        //     }else{
+        //         throw new Error (`[${data.error}]`)                    
+        //     }            
+        //     setSumillas(data.data.sumillas);
+        // } catch (error) {
+        //     notification['error']({
+        //         message: 'Error',
+        //         description: `Error al cargar los oficios ${error}`
+        //       });    
+        // }
     }
 
     const llenaFormulario = (datos) =>{
@@ -128,7 +137,6 @@ function BandejaSumillas(){
         setEstadoFiltroActual(e.target.value);
         setPaginaActual(1);
         await obtenerSumillas(e.target.value, pagina);
-        
     }
 
     const handleTableChange = (pagination, filters, sorter) => {
@@ -137,21 +145,20 @@ function BandejaSumillas(){
             setPaginaActual(pagination.current);
             obtenerSumillas(estadoFiltroActual, pagination.current)
         }
-        
         setFiltroInfo(filters);
       };
 
 
     
     return(
-        <Card title="Oficios Sumillados">
-            <Radio.Group buttonStyle='solid' defaultValue='T' onChange={handleChangeEstado}>
+        <Card title="Oficios Sumillados" >
+            <Radio.Group buttonStyle='solid' defaultValue={estadoFiltroActual} onChange={handleChangeEstado} disabled={loading}>
                 <Radio.Button value='T'>Todos</Radio.Button>
                 <Radio.Button value='S'>Por responder ({enEspera})</Radio.Button>
                 <Radio.Button value='C'>Contestados</Radio.Button>
                 <Radio.Button value='O'>Informados</Radio.Button>
             </Radio.Group>
-            <Table dataSource={lista} size="small" pagination={ paginacionManual ? {current: paginaActual,total: totalRows, showSizeChanger: false} : {pagination: true}} loading={loading} rowKey="id" onChange={handleTableChange} 
+            <Table dataSource={lista} size="small" pagination={ paginacionManual ? {current: paginaActual,total: totalRows, showSizeChanger: false, pageSize: 20} : {pagination: true}} loading={loading} rowKey="id" onChange={handleTableChange} 
             > 
             <Column width={25}
                 render={rowData => {
@@ -255,7 +262,7 @@ function BandejaSumillas(){
 
             <Column title="" width={35} align="center" 
                      render={ rowData => 
-                       <Button onClick={() => handleShowDetalle(rowData.idRegistro)} ><FontAwesomeIcon icon={faSearchPlus}></FontAwesomeIcon>
+                       <Button type='text' onClick={() => handleShowDetalle(rowData.idRegistro)} ><FontAwesomeIcon icon={faSearchPlus}></FontAwesomeIcon>
                        </Button> 
                      }>
             </Column>
@@ -283,118 +290,7 @@ function BandejaSumillas(){
                 onClose={()=> setShowDetalle(false)}
                 visible={showDetalle}
             >
-            <Form form={frmOficio} layout="horizontal">
-            <Row>
-                <Col span={18}>
-                    <Row>
-                        <Col span={12}>
-                            <Form.Item label="Registro" name="txtRegistro" labelCol={{span: 6}}>
-                            <Input disabled prefix={<IoChevronForwardCircleOutline/>}></Input>
-                            </Form.Item>
-                        </Col>
-                        <Col span={12}>
-                            <Form.Item label="Oficio" name="txtOficio" labelCol={{span: 6}}>
-                            <Input disabled prefix={<IoDocumentTextOutline></IoDocumentTextOutline>}></Input>
-                            </Form.Item>
-                        </Col>
-                    </Row>
-                    <Form.Item label="Remitente" name="txtRemitente" labelCol={{span: 3}}>
-                            <Input disabled prefix={oficio?.tipoDocumento === 'I'? <IoPersonOutline/> : <IoMailOutline></IoMailOutline>}></Input>
-                    </Form.Item>
-                    <Form.Item label="Destinatario" name="txtDestinatario" labelCol={{span: 3}}>
-                            <Input disabled prefix={<IoPersonCircleOutline/>}></Input>
-                    </Form.Item>
-                    <Form.Item label="Asunto" name="txtAsunto" labelCol={{span: 3}}>
-                        <TextArea style={{backgroundColor:"#daedff", border:"1px solid #afd8ff", color:"black"}} disabled rows="3" ></TextArea>
-                    </Form.Item>
-
-                </Col>
-                <Col span={6}>
-                <Descriptions bordered size="small">
-                        <Descriptions.Item label="Ingresado :" span={3}>{`${oficio?.usuario}`} </Descriptions.Item>
-                        <Descriptions.Item label="Fecha ingreso:" span={3}>{`${moment(oficio?.fechaIngreso).format("DD/MM/YYYY")}`} </Descriptions.Item>
-                </Descriptions>
-                </Col>
-            </Row>
-            <Row>
-                <Col span={24}>
-                    <Divider orientation='left'>Sumillas</Divider>
-                    <Table dataSource={sumillas} size="small" pagination={false} loading={loading} rowKey="sumiIdSecRegistro" > 
-                                <Column title="FechaSumilla" key="fechaSumilla" width={30} 
-                                    sorter={(a, b) => moment(a.fechaSumilla).unix() - moment(b.fechaSumilla).unix()}
-                                    render={rowData => (moment(rowData.fechaSumilla).format("DD/MM/YYYY"))}/>
-                                <Column title="Sumillado" width={200} 
-                                    render={rowData => {return(
-                                        <div>
-                                            <div>
-                                                {rowData.sumiUsuarioDestino}
-                                            </div>
-                                            <div style={{color: 'green', fontSize:'10px', fontStyle:"italic"}}>
-                                                {rowData.sumiDptoDestino}
-                                            </div>
-                                        </div>
-                                    )}}
-                                />
-            
-                                <Column title="Sumilla" 
-                                    render={
-                                        rowData => {return(
-                                            <div>
-                                                <div> 
-                                                    <IoArrowRedoOutline style={{size:"10px",  marginRight:"5px", color:"#a97817"}}></IoArrowRedoOutline>
-                                                    {`${rowData.sumilla} `}
-                                                </div>
-                                                {rowData.registroContesta &&
-                                                <div style={{fontSize:'11px', color:"#004c9e", marginTop:"8px",  marginLeft:"15px", borderTop:"1px dotted #c0d5ec" }}>
-                                                    <div >
-                                                        <IoArrowUndoOutline style={{size:"10px",  marginRight:"5px"}}/>
-                                                        <span >
-                                                        {`Contesta: ${rowData.registroContesta}`}  
-                                                        </span>
-                                                        <IoCalendarClearOutline style={{fontSize:"12px", marginLeft:"15px",  marginRight:"5px"}}/>
-                                                        {moment(rowData.sumiFechaContesta).format('DD/MM/YYYY')}
-                                                        <IoDocumentTextOutline style={{fontSize:"12px", marginLeft:"15px", marginRight:"5px"}}/>
-                                                        {`${rowData.oficioContesta} - ${rowData.anioContesta} - ${rowData.digitosContesta}`}
-                                                    </div>
-                                                    <div>
-                                                    </div>
-                                                    <span> 
-                                                        {`${rowData.contestacion ? rowData.contestacion : ''  } `}
-                                                    </span>
-                                                </div>}
-                                            </div>
-                                        )}
-                                    }
-                                />
-                                <Column title="Estado"  width={50}  
-                                    render={
-                                        rowData => { 
-                                            let color;
-                                            rowData.sumiEstadoUsuarios === 'E' ? color = "green"
-                                            : rowData.sumiEstadoUsuarios === 'S' ? color = 'red'
-                                            : rowData.sumiEstadoUsuarios === 'C' ? color = 'blue'
-                                            :color = "";
-                                            return(
-                                            rowData.sumiEstadoUsuarios === "S" ? 
-                                                <Badge count={rowData.diasEspera} size="small" offset={[-5,6]} style={{fontSize: "11px"}}>
-                                                    <Tag color={color} style={{fontSize:"10px", height:"22px"}}>
-                                                        {rowData.estadoSumilla}
-                                                    </Tag>
-                                                </Badge>
-                                            :    
-                                            <div>
-                                                <Tag color={color}  style={{fontSize:"10px", height:"22px"}}>
-                                                    {rowData.estadoSumilla}
-                                                </Tag>
-                                            </div>
-                                        )}
-                                    }
-                                />
-                            </Table>       
-                </Col>
-            </Row>
-            </Form>
-
+                <OficioVista oficioId={oficioId}/>
             </Drawer>
         </Card>
      );

@@ -52,29 +52,39 @@ return (
                 >
                     <SubMenu key="sub1" title="Bandejas" icon={<IoMailOutline/>}>
                         {/* <Menu.Item key='1' icon={<IoFileTrayFullOutline/>}>Sumillas en espera</Menu.Item> */}
-                        <Menu.Item key='1' icon={<IoFileTrayFullOutline/>}>
-                            <Link to='/correspondencia/espera'>Sumillas en espera</Link>
-                            
-                        </Menu.Item>
-                        <Menu.Item key='2' icon={<IoFileTrayFullOutline/>}>
-                            <Link to='/correspondencia/oficios'>Oficios</Link>
-                            
-                        </Menu.Item>
+                        {usuario.usuarioSecretaria
+                        ?
+                            <Fragment>
+                                <Menu.Item key='1' icon={<IoFileTrayFullOutline/>}>
+                                    <Link to='/correspondencia/espera'>Sumillas en espera</Link>
+                                    
+                                </Menu.Item>
+                                <Menu.Item key='2' icon={<IoFileTrayFullOutline/>}>
+                                    <Link to='/correspondencia/oficios'>Oficios</Link>
+                                    
+                                </Menu.Item>
+                                <Menu.Item key='3' icon={<IoFileTrayFullOutline/>}>
+                                    <Link to='/correspondencia/bandejaSumillas'>BandejaSumillas</Link>
+                                </Menu.Item>
+
+                            </Fragment>
+                        :
                         <Menu.Item key='3' icon={<IoFileTrayFullOutline/>}>
                             <Link to='/correspondencia/bandejaSumillas'>BandejaSumillas</Link>
                             
                         </Menu.Item>
+                        }
                     {/* {
                         usuario?.direccionId === parseInt(process.env.REACT_APP_GERENCIA_DIRECCION_ID) &&
                         <Menu.Item key='2' icon={<IoFileTrayFull/>}>Lista de oficios</Menu.Item>
                     } */}
                     </SubMenu>
-                    <SubMenu key="sub2" title="Navigation One">
+                    {/* <SubMenu key="sub2" title="Navigation One">
                         <Menu.Item key="5">Option 5</Menu.Item>
                         <Menu.Item key="6">Option 6</Menu.Item>
                         <Menu.Item key="7">Option 7</Menu.Item>
                         <Menu.Item key="8">Option 8</Menu.Item>
-                    </SubMenu>
+                    </SubMenu> */}
                 </Menu>
             </Sider>
         }

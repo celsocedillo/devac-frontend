@@ -70,14 +70,15 @@ function Oficios2(){
     }
 
     const clickBuscar = async () =>{
-        console.log('buscar');
         if (frmBuscar.getFieldValue('txtBusRegistro').length > 0){
             try {           
-                const response = await fetch(`${servidorAPI}oficiosByFiltro/${frmBuscar.getFieldValue('txtBusAnio')}/${frmBuscar.getFieldValue('txtBusRegistro')}`, {method: 'GET', headers: apiHeader});
+                const response = await fetch(`${servidorAPI}oficiosByFiltro/${frmBuscar.getFieldValue('txtBusAnio')}/${frmBuscar.getFieldValue('txtBusRegistro')}/0`, {method: 'GET', headers: apiHeader});
                 const data = (await response.json());
                 if (response.status === 201){
-                    console.log('datos', data.data);
-                    data.data.data.length === 1 && history.push(`/oficio/${data.data.data[0].id}`, {method: 'GET', headers: apiHeader});
+                    //console.log('datos', data.data);
+                    //data.data.data.length === 1 && history.push(`/corresponencia/oficio/${data.data.data[0].id}`, {method: 'GET', headers: apiHeader});
+                    data.data.data.length === 1 && history.push({pathname: `/correspondencia/oficio/${data.data.data[0].id}`,
+                                                                 search: `?filtro=${filtro}&pagina=${paginaActual}`})
                 }else{
                     throw new Error (`[${data.error}]`)                    
                 }            

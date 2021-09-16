@@ -26,7 +26,7 @@ const UserProvider = ({ children }) => {
                 }});
                 const data = (await response.json());
                 if (response.status === 201){
-                    setUsuario(data.data[0]);
+                    setUsuario(data.data);
                     setApiHeader({
                         'Authorization': `Bearer ${logeado.token}`,
                         'Content-Type': 'application/json'
