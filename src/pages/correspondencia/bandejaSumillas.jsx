@@ -1,6 +1,6 @@
 import React, {useState, useEffect, useContext}  from "react";
 import moment from 'moment';
-import { Row, Col, Card, Table, notification, Radio, Popover, Badge, Drawer, Button, Form, Input, Descriptions, Tag, Divider } from 'antd';
+import { Row, Col, Card, Table, notification, Radio, Popover, Badge, Drawer, Button, Form, Input, Descriptions, Tag, Divider, Select } from 'antd';
 import TextArea from "antd/lib/input/TextArea";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSearchPlus, faEllipsisH } from '@fortawesome/free-solid-svg-icons';
@@ -20,6 +20,7 @@ function BandejaSumillas(){
     //const gerencia_direccion_id = process.env.GERENCIA_DIRECCION_ID;
 
     const { Column } = Table;
+    const { Option } = Select;
 
     const [lista, setLista] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -152,12 +153,28 @@ function BandejaSumillas(){
     
     return(
         <Card title="Oficios Sumillados" >
-            <Radio.Group buttonStyle='solid' defaultValue={estadoFiltroActual} onChange={handleChangeEstado} disabled={loading}>
-                <Radio.Button value='T'>Todos</Radio.Button>
-                <Radio.Button value='S'>Por responder ({enEspera})</Radio.Button>
-                <Radio.Button value='C'>Contestados</Radio.Button>
-                <Radio.Button value='O'>Informados</Radio.Button>
-            </Radio.Group>
+            <Row>
+                <Col span={10}>
+                    <Radio.Group buttonStyle='solid' defaultValue={estadoFiltroActual} onChange={handleChangeEstado} disabled={loading}>
+                        <Radio.Button value='T'>Todos</Radio.Button>
+                        <Radio.Button value='S'>Por responder ({enEspera})</Radio.Button>
+                        <Radio.Button value='C'>Contestados</Radio.Button>
+                        <Radio.Button value='O'>Informados</Radio.Button>
+                    </Radio.Group>
+                </Col>
+                <Col span={14}>
+                    <Input.Group compact>
+                        <Select size='large' defaultValue='2021' style={{width:'25%'}}>
+                            <Option value='2021'>2021</Option>
+                            <Option value='2020'>2020</Option>
+                            <Option value='2019'>2019</Option>
+                        </Select>
+                        <Input size='large' style={{width:'75%'}}/>
+                    </Input.Group>
+
+                </Col>
+            </Row>
+            <Row>
             <Table dataSource={lista} size="small" pagination={ paginacionManual ? {current: paginaActual,total: totalRows, showSizeChanger: false, pageSize: 20} : {pagination: true}} loading={loading} rowKey="id" onChange={handleTableChange} 
             > 
             <Column width={25}
@@ -279,7 +296,10 @@ function BandejaSumillas(){
                     )
                 }
             }/> */}
-       </Table>                 
+       </Table>      
+            </Row>
+
+           
 
 
             {/* <ModalOficio show={showModalOficio} onClose={closeModalOficio}></ModalOficio> */}
