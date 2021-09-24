@@ -171,7 +171,8 @@ const Oficio = (props) => {
                 idSecRegistro2: oficio.idSecRegistro,
                 idRegistro: oficio.id,
                 fechaSumilla: moment(),
-                estadoSumilla:  estadoUsuarios.filter(item => item.id === frmAgregaSumilla.getFieldValue('sltEstadoUsuarios'))[0].estado   
+                estadoSumilla:  estadoUsuarios.filter(item => item.id === frmAgregaSumilla.getFieldValue('sltEstadoUsuarios'))[0].estado ,
+                usuario : usuario.usuario
             }
             nuevaSumilla ? insertaSumilla(registro) : updateSumilla(registro);
             frmAgregaSumilla.resetFields();
