@@ -14,9 +14,6 @@ const Cabecera  = () => {
     const history = useHistory();
 
     const {usuario, logout} = useContext(UserContext);
-
-    console.log('cabecera', usuario);
-
     const handleLogout = () => {
         logout();
         history.push('/');

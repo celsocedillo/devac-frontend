@@ -1,12 +1,11 @@
 import React, {useState, useEffect, useContext}  from "react";
 import moment from 'moment';
-import { Row, Col, Card, Table, notification, Radio, Popover, Badge, Drawer, Button, Form, Input, Descriptions, Tag, Divider, Select } from 'antd';
+import { Row, Col, Card, Table, notification, Radio, Popover, Badge, Drawer, Button, Form, Input, Descriptions, Tag, Divider, Select, Space, DatePicker } from 'antd';
 import TextArea from "antd/lib/input/TextArea";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSearchPlus, faEllipsisH } from '@fortawesome/free-solid-svg-icons';
-import { IoArrowRedoOutline, IoArrowUndoOutline, IoCalendarClearOutline, IoDocumentTextOutline, 
-    IoPersonOutline, IoChevronForwardCircleOutline, 
-    IoMailOutline, IoPersonCircleOutline, IoSwapHorizontalOutline, IoCopyOutline } from 'react-icons/io5'
+import {  IoArrowUndoOutline, IoSwapHorizontalOutline, IoCopyOutline, IoSearch } from 'react-icons/io5'
+import { SiMicrosoftexcel } from "react-icons/si";
 
 
 import UserContext from "../../contexts/userContext";
@@ -21,6 +20,11 @@ function BandejaSumillas(){
 
     const { Column } = Table;
     const { Option } = Select;
+    const { Search } = Input;
+    const [frmBuscar] = Form.useForm();
+    frmBuscar.setFieldsValue({'txtAnioRegistro': moment().year()})
+    const [frmFiltro] = Form.useForm();
+    
 
     const [lista, setLista] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -36,6 +40,10 @@ function BandejaSumillas(){
     const [totalRows, setTotalRows] = useState(0);    
     const [estadoFiltroActual, setEstadoFiltroActual] = useState('T');
     const [oficioId, setOficioId] = useState();
+    const [filtro, setFiltro] = useState('');
+    const [filtroOptions, setFiltroOptions] = useState([]);
+    const [filtroValues, setFiltroValues] = useState([]);
+    //const [sumillaEncontrada, setSumillaEncontrada] = useState(null);
 
 
     const {usuario} = useContext(UserContext);
@@ -43,12 +51,37 @@ function BandejaSumillas(){
 
     const [frmOficio]  = Form.useForm();
     
-    
-    
     useEffect(() => {
        async function obtenerData() {
-        await obtenerSumillas('T', 1);
+        //await obtenerSumillas('T', 1);
+        const data = await buscarSumillas('T', 0,0,usuario.departamentoId,null,1);
+        console.log(data);
+        if (data.data?.length > 0){
+            setLista( data.data);
+            setTotalRows(data.totalRows);
+            setEnEspera(data.totalEnEspera);
+            setNombreFiltro([]);
+            setFiltroInfo(null);
+            setEstadoFiltroActual('T');
+        }
+        // if (xestado === 'S'){
+        //     let nombres=[];
+        //     data.data.data.filter(item =>{
+        //         var i = nombres.findIndex(x => (x.text === item.sumillaUsuarioDestino ));
+        //         if(i <= -1){
+        //             nombres.push({value: item.sumillaIdUsuarioDestino, text: item.sumillaUsuarioDestino});
+        //         }
+        //         return null;
+        //     })
+        //     setNombreFiltro(nombres);
+        // }else if(xestado === 'T'){
+        //     setEnEspera(data.data.totalEnEspera);
+        // }else {
+        //     setNombreFiltro([]);
+        //     setFiltroInfo(null);
+        // }        
        }
+
        if (usuario){
         obtenerData();
         setPaginacionManual(true);
@@ -63,7 +96,7 @@ function BandejaSumillas(){
     const obtenerSumillas = async (xestado, pagina) => {
         try{
             setLoading(true);
-            const response = await fetch(`${servidorAPI}oficiosSumillaDireccion/${usuario.direccionId}/${xestado}/${pagina}`, {method: 'GET', headers: apiHeader});
+            const response = await fetch(`${servidorAPI}oficiosSumillaDireccion/${usuario.direccionId}/${xestado}/${pagina}/0/0`, {method: 'GET', headers: apiHeader});
             const data = (await response.json());
             if (response.status === 201){
                 setLista( data.data.data);
@@ -100,82 +133,254 @@ function BandejaSumillas(){
         console.log('al detalle', id);
         setOficioId(id);
         setShowDetalle(true);
-
-
-        // try {           
-        //     const response = await fetch(`${servidorAPI}oficio/${id}`, {method:'GET', headers: apiHeader});
-        //     const data = (await response.json());
-        //     if (response.status === 201){
-        //         console.log("oficio", data.data);
-        //         setOficio(data.data);
-        //         setShowDetalle(true);
-        //         llenaFormulario(data.data);
-        //     }else{
-        //         throw new Error (`[${data.error}]`)                    
-        //     }            
-        //     setSumillas(data.data.sumillas);
-        // } catch (error) {
-        //     notification['error']({
-        //         message: 'Error',
-        //         description: `Error al cargar los oficios ${error}`
-        //       });    
-        // }
-    }
-
-    const llenaFormulario = (datos) =>{
-        frmOficio.setFieldsValue({'txtRegistro': `${datos.anio}- ${datos.registroDpto}`})
-        frmOficio.setFieldsValue({'txtOficio': `${datos?.tipoOficio} - ${datos?.anio} - ${datos?.digitos}`})
-        frmOficio.setFieldsValue({'txtRemitente': ` ${datos.usuarioOrigen} - ${datos.dptoOrigen}`})
-        frmOficio.setFieldsValue({'txtDestinatario': datos.usuarioDestino})
-        frmOficio.setFieldsValue({'txtAsunto': datos.asunto})
-        frmOficio.setFieldsValue({'txtObservacion': datos.observacion})
     }
 
     const handleChangeEstado = async (e) => {
         let pagina = 0;
-        e.target.value === 'S' ? pagina = 0 : pagina = 1
-        e.target.value === 'S' ? setPaginacionManual(false) : setPaginacionManual(true)
+        //e.target.value === 'S' ? pagina = 0 : pagina = 1
+        //e.target.value === 'S' ? setPaginacionManual(false) : setPaginacionManual(true)
         setEstadoFiltroActual(e.target.value);
         setPaginaActual(1);
-        await obtenerSumillas(e.target.value, pagina);
+        //await obtenerSumillas(e.target.value, pagina);
+        const data = await buscarSumillas(e.target.value, 0,0,usuario.departamentoId,null,1);
+        setLista( data.data);
+        setTotalRows(data.totalRows);
+        //setEnEspera(data.totalEnEspera);
     }
 
-    const handleTableChange = (pagination, filters, sorter) => {
-        console.log('Various parameters', pagination, filters, sorter);
+    const handleTableChange = async (pagination, filters, sorter) => {
+        //console.log('Various parameters', pagination, filters, sorter);
         if (paginacionManual) {
+            let data;
             setPaginaActual(pagination.current);
-            obtenerSumillas(estadoFiltroActual, pagination.current)
+            if (!filtro){
+                data = await buscarSumillas(estadoFiltroActual, 0,0,usuario.departamentoId,null,pagination.current);
+            }else{
+                //data = await buscarSumillas(0,0,usuario.departamentoId,filtro,pagination.current);
+                data = await buscarSumillas(null,0,0,usuario.departamentoId,filtro,pagination.current);
+            }
+            setLista( data.data);
         }
         setFiltroInfo(filters);
       };
 
-
     
+    const handleClickBuscar = async () => {
+        const sumillaEncontrada = await buscarSumillas(null,frmBuscar.getFieldValue('txtAnioRegistro'), frmBuscar.getFieldValue('txtRegistro'), usuario.direccionId, null, 0)
+        sumillaEncontrada.length > 0 && handleShowDetalle(sumillaEncontrada[0].idRegistro);
+    }
+
+    const buscarSumillas = async(pestado, panio, pregistro, pdepartamento, pfiltro, ppagina) => {
+        try {
+            setLoading(true);
+            if (pestado){
+                const response = await fetch(`${servidorAPI}oficiosSumillaDireccion/${usuario.direccionId}/${pestado}/${ppagina}/0/0`, {method: 'GET', headers: apiHeader});
+                const data = (await response.json());
+                if (response.status === 201){
+                    setLoading(false);
+                    return data.data
+                }else{
+                    throw new Error (`[${data.error}]`)                    
+                }   
+            }
+
+            if (pfiltro){
+                const response = await fetch(`${servidorAPI}oficiosSumillaByFiltro/${usuario.departamentoId}/${ppagina}/?${pfiltro}`, {method: 'GET', headers: apiHeader});        
+                const data = (await response.json());
+                if (response.status === 201){
+                    setLoading(false);
+                    return data.data
+                }else{
+                    throw new Error (`[${data.error}]`)                    
+                }   
+            }else{
+                const response = await fetch(`${servidorAPI}oficiosSumillaDireccion/${pdepartamento}/null/${ppagina}/${panio}/${pregistro}`, {method: 'GET', headers: apiHeader});
+                const data = (await response.json());
+                if (response.status === 201){
+                    setLoading(false);
+                    return data.data.data
+                }else{
+                    throw new Error (`[${data.error}]`)                    
+                }            
+            }
+            // setLoading(true);
+            // const response = await fetch(`${servidorAPI}oficiosSumillaDireccion/${pdepartamento}/null/${ppagina}/${panio}/${pregistro}`, {method: 'GET', headers: apiHeader});
+            // const data = (await response.json());
+            return null;
+        } catch (error) {
+            setLoading(false);
+            notification['error']({
+                message: 'Error',
+                description: `Error al buscar las sumillas ${error}`
+              });                       
+        }
+    }    
+
+    const handleClickFiltrar = async (excel) => {
+        try {
+            let xfiltro = '';
+            let xfiltroOptions=[];
+            let xfiltroValues=[];
+            const fechaInicio = frmFiltro.getFieldValue('txtFecha')?.inicio
+            const fechaFin = frmFiltro.getFieldValue('txtFecha')?.fin
+            const asunto = frmFiltro.getFieldValue('txtAsunto')
+            const oficio = frmFiltro.getFieldValue('txtOficio')
+
+            if (fechaInicio && moment(fechaInicio, 'YYYY-MM-DD').isValid()){
+                xfiltro = `fechaDesde=${fechaInicio}`
+                xfiltroOptions.push({label:`fecha=${moment(fechaInicio).format('DD-MM-YYYY')}`, value:'1'});
+                xfiltroValues.push('1')
+            }
+            if (fechaFin && moment(fechaFin, 'YYYY-MM-DD').isValid()){
+                xfiltro = `${xfiltro}&fechaHasta=${fechaFin}`
+                xfiltroOptions.push({label:`al=${moment(fechaFin).format('DD-MM-YYYY')}`, value:'2'})
+                xfiltroValues.push('2')
+            }
+            if (asunto){
+                xfiltro = `${xfiltro}&asunto=${encodeURI(asunto)}`  
+                xfiltroOptions.push({label:`asunto=${asunto}`, value:'3'})
+                xfiltroValues.push('3')
+            } 
+            if (oficio){
+                xfiltro = `${xfiltro}&oficio=${encodeURI(oficio)}`  
+                xfiltroOptions.push({label:`oficio=${oficio}`, value:'4'})
+                xfiltroValues.push('4')
+            }
+
+
+            if (excel){
+                const response = await fetch(`${servidorAPI}oficiosSumillaByFiltroExcel/${usuario.departamentoId}/1/?${xfiltro}`, {method: 'GET', headers: apiHeader});        
+                response.blob().then(blob => {
+                    var url = window.URL.createObjectURL(blob);
+                    var a = document.createElement('a');
+                    a.href = url;
+                    a.download = "filename.xlsx";
+                    document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
+                    a.click();    
+                    a.remove();  //afterwards we remove the element again                           
+                });
+
+            }else{
+                setFiltroOptions(xfiltroOptions);
+                setFiltroValues(xfiltroValues);
+                setLista([]);
+                setTotalRows(0);
+   
+                if (xfiltro.length > 0){
+                    const data = await buscarSumillas(null,0,0,usuario.departamentoId,xfiltro,1);
+                    if (data.data?.length > 0 ) {
+                        setPaginaActual(1);
+                        setFiltro(xfiltro);
+                        setLista(data.data);
+                        setTotalRows(data.totalRows);
+                    }
+                }
+            }
+
+        } catch (error) {
+            notification['error']({
+                message: 'Error',
+                description: `Error al validar los filtros ${error}`
+              });                       
+        }
+
+    }
+
+    const handleClickExcel = async ()=>{
+
+    }
+
+    const handleClickReset = async () =>{
+        setFiltro(null);
+        setFiltroValues([])
+        setFiltroOptions([]);
+        frmFiltro.setFieldsValue({'txtFecha': null})
+        frmFiltro.setFieldsValue({'txtFecha': null})
+        frmFiltro.setFieldsValue({'txtAsunto': null})
+        frmFiltro.setFieldsValue({'txtOficio': null})
+        const data = await buscarSumillas('T', 0,0,usuario.departamentoId,null,1);
+        if (data.data?.length > 0){
+            setLista( data.data);
+            setTotalRows(data.totalRows);
+            setEnEspera(data.totalEnEspera);
+            setNombreFiltro([]);
+            setFiltroInfo(null);
+            setEstadoFiltroActual('T');
+        }
+    }
+
     return(
         <Card title="Oficios Sumillados" >
             <Row>
-                <Col span={10}>
-                    <Radio.Group buttonStyle='solid' defaultValue={estadoFiltroActual} onChange={handleChangeEstado} disabled={loading}>
-                        <Radio.Button value='T'>Todos</Radio.Button>
-                        <Radio.Button value='S'>Por responder ({enEspera})</Radio.Button>
-                        <Radio.Button value='C'>Contestados</Radio.Button>
-                        <Radio.Button value='O'>Informados</Radio.Button>
-                    </Radio.Group>
-                </Col>
-                <Col span={14}>
-                    <Input.Group compact>
-                        <Select size='large' defaultValue='2021' style={{width:'25%'}}>
-                            <Option value='2021'>2021</Option>
-                            <Option value='2020'>2020</Option>
-                            <Option value='2019'>2019</Option>
+                <Col span={18}>
+                    {
+                        !filtro 
+                        ?
+                        <Radio.Group buttonStyle='solid' defaultValue={estadoFiltroActual} onChange={handleChangeEstado} disabled={loading}>
+                            <Radio.Button value='T'>Todos</Radio.Button>
+                            <Radio.Button value='S'>Por responder ({enEspera})</Radio.Button>
+                            <Radio.Button value='C'>Contestados</Radio.Button>
+                            <Radio.Button value='O'>Informados</Radio.Button>
+                        </Radio.Group>
+                        :
+                        <Select size='small' mode='multiple' options={filtroOptions} value={filtroValues}>  
+                            
                         </Select>
-                        <Input size='large' style={{width:'75%'}}/>
-                    </Input.Group>
+                    }
+                </Col>
+                
 
+                <Col  span={6} style={{marginTop:'2px'}}>
+                    <Space align='center'>
+                        <Popover title="Filtro de sumillas" trigger="click" 
+                            content={
+                            <Form form={frmFiltro} layout='vertical'>
+                                <Form.Item label="Fecha de sumilla (YYYY-MM-DD)">
+                                    <Input.Group compact>
+                                        <Form.Item name={['txtFecha', 'inicio']} noStyle >
+                                            <DatePicker size='small' placeholder="Fecha inicio" style={{width:'50%'}} size="small"/>
+                                        </Form.Item>
+                                        <Form.Item name={['txtFecha', 'fin']} noStyle>
+                                            <DatePicker size='small' placeholder="Fecha fin" style={{width:'50%'}} size="small"/>
+                                        </Form.Item>
+                                    </Input.Group>
+                                </Form.Item>    
+                                <Form.Item name="txtOficio" label="Oficio :" >
+                                    <Input size='small'></Input>
+                                </Form.Item>                   
+                                <Form.Item name="txtAsunto" label="Asunto :" >
+                                    <Input size='small'></Input>
+                                </Form.Item>                   
+                                <Button size='small' onClick={() => handleClickFiltrar(false)}>Filtrar</Button>
+                                <Button size='small' onClick={handleClickReset}>Reset</Button>
+                                <Button style={{backgroundColor:'#d2e8c7'}} size='small' onClick={() => handleClickFiltrar(true)} icon={<SiMicrosoftexcel/>}> Excel</Button>
+                            </Form>
+                            } 
+                        >
+                            <Button size='small' disabled={loading}><IoSearch style={{fontSize: '14px'}}/></Button>
+                        </Popover>
+                        <Form form={frmBuscar} layout='horizontal' >
+                            <Input.Group compact>
+                                <Form.Item name='txtAnioRegistro'  noStyle  >
+                                    <Input size='small' style={{width:'30%'}} disabled={loading} />
+                                </Form.Item>
+                                <Form.Item name='txtRegistro' noStyle>
+                                <Search size='small' style={{width:'70%'}} placeholder="Registro" enterButton="Buscar" onSearch={handleClickBuscar} disabled={loading} />
+                                </Form.Item>
+                            </Input.Group>
+                        </Form>
+                    </Space>
+                    
                 </Col>
             </Row>
-            <Row>
-            <Table dataSource={lista} size="small" pagination={ paginacionManual ? {current: paginaActual,total: totalRows, showSizeChanger: false, pageSize: 20} : {pagination: true}} loading={loading} rowKey="id" onChange={handleTableChange} 
+            
+            <Table dataSource={lista} 
+                   size="small" 
+                   pagination={ paginacionManual ? {current: paginaActual,total: totalRows, showSizeChanger: false, pageSize: 20, size:'default'} : {pagination: true}} 
+                   loading={loading} 
+                   rowKey="id" 
+                   onChange={handleTableChange} 
+                   footer={() => <span style={{fontWeight: 'bold' }}>Nro. de registros {totalRows}</span>}
             > 
             <Column width={25}
                 render={rowData => {
@@ -196,7 +401,7 @@ function BandejaSumillas(){
              />
 
             <Column title="FechaSumilla" key="fechaSumilla" width={30} 
-                sorter={(a, b) => moment(a.fechaSumilla).unix() - moment(b.fechaSumilla).unix()}
+                // sorter={(a, b) => moment(a.fechaSumilla).unix() - moment(b.fechaSumilla).unix()}
                 render={rowData => (moment(rowData.fechaSumilla).format("DD/MM/YYYY"))}/>
 
             <Column title="Sumillado" 
@@ -297,7 +502,7 @@ function BandejaSumillas(){
                 }
             }/> */}
        </Table>      
-            </Row>
+            
 
            
 

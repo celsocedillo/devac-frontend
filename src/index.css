@@ -86,11 +86,11 @@ code {
   padding: 2px 2px;
 }
 
-.ant-input {
+/* .ant-input {
   padding: 4px 4px;
   font-size: 12px; 
   height: 22px;
-}
+} */
 
 .ant-input[disabled] {
   color: rgb(0 0 0 / 50%);
@@ -120,9 +120,9 @@ code {
    line-height: 20px;
  }
 
- .ant-select-single:not(.ant-select-customize-input) .ant-select-selector .ant-select-selection-search-input {
+ /* .ant-select-single:not(.ant-select-customize-input) .ant-select-selector .ant-select-selection-search-input {
   height: 22px;
-}
+} */
 
 .ant-select-item {
   
@@ -163,9 +163,9 @@ code {
   padding-bottom: 3px;
 }
 
-.ant-input-search-small .ant-input-search-button {
+/* .ant-input-search-small .ant-input-search-button {
   height: 22px;
-}
+} */
 
 .ant-input-group-addon {
   font-size: 12px;
@@ -216,10 +216,10 @@ code {
   font-size: 12px;
 }
 
-.ant-btn-icon-only.ant-btn-sm {
+/* .ant-btn-icon-only.ant-btn-sm {
   height: 22px;
   font-size: 12px;
-}
+} */
 
 .ant-popover-inner-content {
     border: 1px solid #9bd3ff;
@@ -278,4 +278,18 @@ code {
   padding: 0 10px;
   font-size: 12px;
   line-height: 28px;
+}
+
+/* .ant-input-search-large .ant-input-search-button {
+  height: 22px;
+} */
+
+.ant-btn-icon-only.ant-btn-lg {
+  padding: 1px 0;
+  font-size: 14px;
+}
+
+.ant-btn-lg {
+  font-size: 12px; 
+ 
 }
