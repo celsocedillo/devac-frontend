@@ -27,7 +27,7 @@ return (
       <Layout>
         <Sidebar/>
         <Layout>
-        <Content>
+        <Content style={{minHeight: 540}}>
         <Route exact path='/' component={login}/>
         <PrivateRoute exact path='/listaModulos' component={Modulos}/>
         <PrivateRoute path='/correspondencia' component={CorrespondenciaRouter}/>

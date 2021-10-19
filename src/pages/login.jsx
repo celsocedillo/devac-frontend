@@ -35,7 +35,7 @@ const Login = () => {
                         <Input placeholder="Usuario"  suffix={<IoPersonOutline/>}></Input>
                     </Form.Item>
                     <Form.Item name='txtPassword' >
-                        <Input.Password placeholder="Password"></Input.Password>
+                        <Input.Password placeholder="Password" onPressEnter={handleLogin}></Input.Password>
                     </Form.Item>
                     <Form.Item>
                         <Button type="primary" size="small" style={{width:'100%'}} onClick={handleLogin}>Ingreso</Button>
