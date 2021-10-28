@@ -328,7 +328,6 @@ function BandejaSumillas(){
                         </Select>
                     }
                 </Col>
-                
 
                 <Col  span={6} style={{marginTop:'2px'}}>
                     <Space align='center'>
@@ -365,12 +364,11 @@ function BandejaSumillas(){
                                     <Input size='small' style={{width:'30%'}} disabled={loading} />
                                 </Form.Item>
                                 <Form.Item name='txtRegistro' noStyle>
-                                <Search size='small' style={{width:'70%'}} placeholder="Registro" enterButton="Buscar" onSearch={handleClickBuscar} disabled={loading} />
+                                <Search size='small' style={{width:'70%'}} placeholder="Registro" enterButton="Buscar" onSearch={handleClickBuscar} disabled={loading } />
                                 </Form.Item>
                             </Input.Group>
                         </Form>
                     </Space>
-                    
                 </Col>
             </Row>
             
@@ -503,12 +501,6 @@ function BandejaSumillas(){
             }/> */}
        </Table>      
             
-
-           
-
-
-            {/* <ModalOficio show={showModalOficio} onClose={closeModalOficio}></ModalOficio> */}
-
             <Drawer 
                 title='Oficio'
                 width={850}

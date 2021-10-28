@@ -1,10 +1,10 @@
 import React, {useState, useEffect, useRef, useContext}  from "react";
 import { Link, useHistory, useLocation } from "react-router-dom";
 import moment from 'moment';
-import { Row, Col, Card, Table, Button, notification, Avatar, Popover, Badge, Input, Form, DatePicker, Alert } from 'antd';
+import { Row, Col, Card, Table, Button, notification, Avatar, Popover, Badge, Input, Form, DatePicker, Alert, Space, Select } from 'antd';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {  faEllipsisH  } from '@fortawesome/free-solid-svg-icons';
-import { IoPersonOutline, IoMailOutline, IoArrowRedoOutline, IoArrowUndoOutline, IoFlashOutline, IoCalendarClearOutline, IoCaretForwardCircleOutline} from 'react-icons/io5'
+import { IoPersonOutline, IoMailOutline, IoArrowRedoOutline, IoArrowUndoOutline, IoFlashOutline, IoCalendarClearOutline, IoCaretForwardCircleOutline, IoSearch} from 'react-icons/io5'
 import UserContext from "../../contexts/userContext";
 
 
@@ -16,6 +16,9 @@ function Oficios2(){
     const servidorAPI = process.env.REACT_APP_API_URL;
 
     const { Column } = Table;
+    const { Search } = Input;
+    const { Option } = Select;
+
     let history = useHistory();
 
     const [lista, setLista] = useState(null);
@@ -32,6 +35,8 @@ function Oficios2(){
 
     const [frmBuscar]  = Form.useForm();
     const [frmFiltro]  = Form.useForm();
+    const [filtroOptions, setFiltroOptions] = useState([]);
+    const [filtroValues, setFiltroValues] = useState([]);
     const refBusAnio = useRef(null);
     const {usuario, apiHeader} = useContext(UserContext);
 
@@ -70,7 +75,7 @@ function Oficios2(){
     }
 
     const clickBuscar = async () =>{
-        if (frmBuscar.getFieldValue('txtBusRegistro').length > 0){
+        if (frmBuscar.getFieldValue('txtBusRegistro')){
             try {           
                 const response = await fetch(`${servidorAPI}oficiosByFiltro/${frmBuscar.getFieldValue('txtBusAnio')}/${frmBuscar.getFieldValue('txtBusRegistro')}/0`, {method: 'GET', headers: apiHeader});
                 const data = (await response.json());
@@ -112,11 +117,50 @@ function Oficios2(){
             obtenerOficios(0,0,filtro,1);
             setFiltro(filtro);
             setShowFiltro(!showFiltro);
-            frmFiltro.getFieldValue('txtFecha')?.inicio && (msg=`[${moment(frmFiltro.getFieldValue('txtFecha')?.inicio).format('DD-MM-YYYY')}]`)
-            frmFiltro.getFieldValue('txtFecha')?.fin && (msg=` ${msg} [${moment(frmFiltro.getFieldValue('txtFecha')?.fin).format('DD-MM-YYYY')}]`)
-            frmFiltro.getFieldValue('txtRemitente') && (msg=`${msg} [${frmFiltro.getFieldValue('txtRemitente')}]`)
-            frmFiltro.getFieldValue('txtAsunto') && (msg=`${msg} [${frmFiltro.getFieldValue('txtAsunto')}]`)
-            frmFiltro.getFieldValue('txtOficio') && (msg=`${msg} [${frmFiltro.getFieldValue('txtOficio')}]`)
+            // frmFiltro.getFieldValue('txtFecha')?.inicio && (msg=`[${moment(frmFiltro.getFieldValue('txtFecha')?.inicio).format('DD-MM-YYYY')}]`)
+            // frmFiltro.getFieldValue('txtFecha')?.fin && (msg=` ${msg} [${moment(frmFiltro.getFieldValue('txtFecha')?.fin).format('DD-MM-YYYY')}]`)
+            // frmFiltro.getFieldValue('txtRemitente') && (msg=`${msg} [${frmFiltro.getFieldValue('txtRemitente')}]`)
+            // frmFiltro.getFieldValue('txtAsunto') && (msg=`${msg} [${frmFiltro.getFieldValue('txtAsunto')}]`)
+            // frmFiltro.getFieldValue('txtOficio') && (msg=`${msg} [${frmFiltro.getFieldValue('txtOficio')}]`)
+            let xfiltro = '';
+            let xfiltroOptions=[];
+            let xfiltroValues=[];
+
+            const fechaInicio = frmFiltro.getFieldValue('txtFecha')?.inicio
+            const fechaFin = frmFiltro.getFieldValue('txtFecha')?.fin
+            const remitente = frmFiltro.getFieldValue('txtRemitente');
+            const asunto = frmFiltro.getFieldValue('txtAsunto')
+            const oficio = frmFiltro.getFieldValue('txtOficio')
+
+            if (fechaInicio && moment(fechaInicio, 'YYYY-MM-DD').isValid()){
+                xfiltro = `fechaDesde=${fechaInicio}`
+                xfiltroOptions.push({label:`fecha=${moment(fechaInicio).format('DD-MM-YYYY')}`, value:'1'});
+                xfiltroValues.push('1')
+            }            
+            if (fechaFin && moment(fechaFin, 'YYYY-MM-DD').isValid()){
+                xfiltro = `${xfiltro}&fechaHasta=${fechaFin}`
+                xfiltroOptions.push({label:`al=${moment(fechaFin).format('DD-MM-YYYY')}`, value:'2'})
+                xfiltroValues.push('2')
+            }
+            if (remitente){
+                xfiltro = `${xfiltro}&remitente=${encodeURI(remitente)}`  
+                xfiltroOptions.push({label:`remitente=${remitente}`, value:'3'})
+                xfiltroValues.push('3')
+            } 
+            if (asunto){
+                xfiltro = `${xfiltro}&asunto=${encodeURI(asunto)}`  
+                xfiltroOptions.push({label:`asunto=${asunto}`, value:'4'})
+                xfiltroValues.push('4')
+            } 
+            if (oficio){
+                xfiltro = `${xfiltro}&oficio=${encodeURI(oficio)}`  
+                xfiltroOptions.push({label:`oficio=${oficio}`, value:'5'})
+                xfiltroValues.push('5')
+            }
+
+            setFiltroOptions(xfiltroOptions);
+            setFiltroValues(xfiltroValues);
+
             setMensaje(`${msg} Se encontraron ${totalRows} registros`);
             window.localStorage.setItem("msgFiltro", `${msg} Se encontraron ${totalRows} registros`);
             window.localStorage.setItem("filtro", filtro);                    
@@ -154,91 +198,89 @@ function Oficios2(){
         }
     };
 
+    const handleClickReset = async () =>{
+        let pagina = 1;
+        setFiltro(null);
+        setFiltroValues([])
+        setFiltroOptions([]);
+        setShowMensaje(!showMensaje);
+        frmFiltro.setFieldsValue({'txtFecha': null})
+        frmFiltro.setFieldsValue({'txtFecha': null})
+        frmFiltro.setFieldsValue({'txtAsunto': null})
+        frmFiltro.setFieldsValue({'txtOficio': null})
+        frmFiltro.setFieldsValue({'txtRemitente': null})
+        await obtenerOficios(0,0,null,pagina);
+    }
+
+
     
     return(
-        <Card title="Lista de oficios" size="small"
-              extra={
-                  <div style={{position: 'fixed',
-                    right: '32px',
-                    bottom: '50px',
-                    display: 'flex',
-                    flexDirection : 'column',
-                    zIndex: 2147483640,
-                    cursor: 'pointer'}}>
+        <Card title="Lista de oficios" size="small">
+            <Row >
+                <Col span="18">
+                </Col>
+                <Col span="6" style={{marginBottom: '2px'}}>
+                    <Space align="center">
+                    <Popover title="Filtro de oficios" trigger="click" 
+                        content={
+                            <Form form={frmFiltro} layout="vertical">
+                                    <Form.Item name="txtRemitente" label="Remitente :" >
+                                        <Input></Input>
+                                    </Form.Item>
+                                    <Form.Item name="txtAsunto" label="Asunto :" >
+                                        <Input></Input>
+                                    </Form.Item>
+                                    <Form.Item label="Fecha" labelCol={{span: 4}}>
+                                        <Input.Group compact>
+                                            <Form.Item name={['txtFecha', 'inicio']} noStyle >
+                                                <DatePicker placeholder="Fecha inicio" style={{width:'50%'}} size="small"/>
+                                            </Form.Item>
+                                            <Form.Item name={['txtFecha', 'fin']} noStyle>
+                                                <DatePicker placeholder="Fecha fin" style={{width:'50%'}} size="small"/>
+                                            </Form.Item>
+                                        </Input.Group>
+                                    </Form.Item>
+                                    <Form.Item name="txtOficio" label="Oficio :" labelCol={{span: 4}}>
+                                        <Input></Input>
+                                    </Form.Item>        
+                                    <Button size="small" onClick={filtrar}>Consultar</Button>           
+                                    <Button size="small" onClick={handleClickReset}>Reset</Button>           
 
-                  <Popover style={{position:'fixed', 
-                           display:'flex'}} 
-                           trigger='click' 
-                           visible={showBuscar}
-                           onVisibleChange={() => {setShowBuscar(!showBuscar); }}
-                           forceRender
-                           content={
-                            <Form form={frmBuscar} layout="vertical" >
-                                <h3>Busqueda de oficio</h3>
-                                <Form.Item label='Anio' name='txtBusAnio'>
-                                    <Input prefix={<IoCalendarClearOutline/>}></Input>
-                                </Form.Item>
-                                <Form.Item label='Registro' name='txtBusRegistro'>
-                                    <Input prefix={<IoCaretForwardCircleOutline/>} ref={refBusAnio} onPressEnter={clickBuscar}></Input>
-                                </Form.Item>
-                                <Form.Item >
-                                    <Button type='primary' size='small' onClick={clickBuscar}>OK</Button>
-                                </Form.Item>
-                            </Form>
-                    }
-                  >
-                      <Avatar onClick={openBusqueda} style={{backgroundColor:'#85c3fd'}} icon={<IoFlashOutline style={{fontSize: '15px', color:'black'}}/>}>
-                      </Avatar>
-                  </Popover>
-                  </div>
-            }        
-        >
-            <Row>
-            <Col span={24}>
-            <Button size='small' style={{marginBottom:'4px'}} onClick={()=> setShowFiltro(!showFiltro)}>Filtro</Button>
-            </Col>
+                        </Form>                            
+                        }
+                        >
+                            <Button size='small' disabled={loading}><IoSearch style={{fontSize: '14px'}}/></Button>
+                        </Popover>
+
+                    <Form form={frmBuscar} layout="horizontal" >
+                    <Input.Group compact>
+                        <Form.Item name='txtBusAnio' noStyle>
+                            <Input size='small' style={{width:'30%'}} ></Input>
+                        </Form.Item>
+                        <Form.Item name='txtBusRegistro' noStyle>
+                            <Search size='small' style={{width:'70%'}} placeholder="Registro" enterButton="Buscar" onSearch={clickBuscar} disabled={loading} />
+                            {/* <Input size='small' style={{width:'70%'}} prefix={<IoCaretForwardCircleOutline/>} ref={refBusAnio} onPressEnter={clickBuscar}></Input> */}
+                        </Form.Item>
+                    </Input.Group>
+                    </Form>
+                    </Space>
+                </Col>
             </Row>
-            {showFiltro &&
-            <Card>
-                <Form form={frmFiltro}>
-                    <Row>
-                        <Col span={12}>
-                            
-                            <Form.Item name="txtRemitente" label="Remitente :" labelCol={{span: 4}}>
-                                <Input></Input>
-                            </Form.Item>
-                            <Form.Item name="txtAsunto" label="Asunto :" labelCol={{span: 4}}>
-                                <Input></Input>
-                            </Form.Item>
-                            <Form.Item labelCol={{span: 4}} >
-                                <Button type="primary" size="small" onClick={filtrar}>Consultar</Button>
-                            </Form.Item>
-                        </Col>
-                        <Col span={12}>
-                            <Form.Item label="Fecha" labelCol={{span: 4}}>
-                                <Input.Group compact>
-                                    <Form.Item name={['txtFecha', 'inicio']} noStyle >
-                                        <DatePicker placeholder="Fecha inicio" style={{width:'50%'}} size="small"/>
-                                    </Form.Item>
-                                    <Form.Item name={['txtFecha', 'fin']} noStyle>
-                                        <DatePicker placeholder="Fecha fin" style={{width:'50%'}} size="small"/>
-                                    </Form.Item>
-                                </Input.Group>
-                            </Form.Item>
-                            <Form.Item name="txtOficio" label="Oficio :" labelCol={{span: 4}}>
-                                <Input></Input>
-                            </Form.Item>                   
-                        </Col>
-                    </Row>
-                </Form>
-            </Card>
-            }
-            {showMensaje && <Alert message={mensaje} type="success" visible={showMensaje} size="small"/>}
-            <Table dataSource={lista} size="small" loading={loading} rowKey="id" 
-            pagination={ paginacionManual ? {current: paginaActual,total: totalRows, showSizeChanger: false, pageSize: 20} : {pagination: true}} 
-            onChange={handleTableChange}> 
-            <Column title="Año" dataIndex="anio" key="anio" />
-            <Column title="Registro" key="registroDpto"
+
+            {showMensaje && <Select suffixIcon={<IoPersonOutline/>} size='small' mode='multiple' options={filtroOptions} value={filtroValues}/>  }
+   
+            <Table 
+                dataSource={lista} 
+                size="small" 
+                loading={loading} 
+                rowKey="id" 
+                pagination={ paginacionManual ? {current: paginaActual,total: totalRows, showSizeChanger: false, pageSize: 20} : {pagination: true}} 
+                onChange={handleTableChange}
+                footer={() => <span style={{fontWeight: 'bold' }}>Nro. de registros {totalRows}</span>}
+            > 
+
+            <Column title="Año" dataIndex="anio" key="anio" width={25} />
+            <Column title="Registro" key="registroDpto" width={30}
                 render={rowData => 
                     <Link to={
                         {
@@ -251,7 +293,7 @@ function Oficios2(){
 
                 }
             />
-            <Column title="Fecha" key="fechaIngreso" 
+            <Column title="Fecha" key="fechaIngreso" width={30}
                 sorter={(a, b) => moment(a.fechaIngreso).unix() - moment(b.fechaIngreso).unix()}
                 render={rowData => (moment(rowData.fechaIngreso).format("DD/MM/YYYY"))}/>
             <Column title="Remitente" key="usuarioOrigen" width={220}
@@ -265,7 +307,7 @@ function Oficios2(){
                         )
                     }}
             />                
-            <Column title="Oficio"  
+            <Column title="Oficio" width={150}  
                 render={rowData => (`${rowData.tipoOficio}-${rowData.anio}-${rowData.digitos}`)}/>
             <Column title="Asunto"  
                 render={rowData => { return(
