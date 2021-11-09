@@ -7,7 +7,7 @@ import { faSearchPlus, faEllipsisH } from '@fortawesome/free-solid-svg-icons';
 import { IoArrowRedoOutline, IoArrowUndoOutline, IoCalendarClearOutline, IoDocumentTextOutline, 
     IoPersonOutline, IoChevronForwardCircleOutline,
     IoMailOutline, IoPersonCircleOutline } from 'react-icons/io5'
-
+import { SiMicrosoftexcel } from "react-icons/si";
 
 import UserContext from "../../contexts/userContext";
 import OficioVista from "./components/OficioVista";
@@ -108,6 +108,19 @@ function EnEspera(){
         frmOficio.setFieldsValue({'txtObservacion': datos.observacion})
     }
 
+    const handleClickExcel = async () => {
+        const response = await fetch(`${servidorAPI}oficiosEnEsperaExcel`, {method: 'GET', headers: apiHeader});        
+        response.blob().then(blob => {
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = "sumillasEspera.xlsx";
+            document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
+            a.click();    
+            a.remove();  //afterwards we remove the element again            
+        });
+    }
+
 
     
     return(
@@ -140,6 +153,10 @@ function EnEspera(){
                         En espera
                     </Card>
                 </Col>
+                <Col span={18} style={{textAlign:"end", alignContent:""}} >
+                    <Button style={{marginTop:"25px"}} size="small" icon={<SiMicrosoftexcel/>} onClick={() => handleClickExcel()}>Excel</Button>
+                </Col>
+
             </Row>
 
             <Table dataSource={lista} size="small" pagination={false} loading={loading} rowKey="id" > 
