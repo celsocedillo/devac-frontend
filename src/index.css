@@ -256,10 +256,13 @@ code {
   padding: 4px 5px;
 }
 
+.ant-menu {
+  font-size: 12px;
+}
 
 .ant-menu-vertical > .ant-menu-item, .ant-menu-vertical-left > .ant-menu-item, .ant-menu-vertical-right > .ant-menu-item, .ant-menu-inline > .ant-menu-item, .ant-menu-vertical > .ant-menu-submenu > .ant-menu-submenu-title, .ant-menu-vertical-left > .ant-menu-submenu > .ant-menu-submenu-title, .ant-menu-vertical-right > .ant-menu-submenu > .ant-menu-submenu-title, .ant-menu-inline > .ant-menu-submenu > .ant-menu-submenu-title {
-  height: 25px;
-  line-height: 25px;
+  height: 21px;
+  line-height: 21px;
 }
 
 .ant-menu-sub.ant-menu-inline > .ant-menu-item, .ant-menu-sub.ant-menu-inline > .ant-menu-submenu > .ant-menu-submenu-title {
@@ -293,3 +296,4 @@ code {
   font-size: 12px; 
  
 }
+

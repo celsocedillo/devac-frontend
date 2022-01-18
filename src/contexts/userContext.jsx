@@ -9,6 +9,7 @@ const UserProvider = ({ children }) => {
     const [apiHeader, setApiHeader] = useState(null);
     const [modulo, setModulo] = useState(null);
     const servidorAPISEG = process.env.REACT_APP_API_URL;
+    //const servidorAPISEG = `${process.env.REACT_APP_API_URL}`;
     
 
     useEffect(() => {
@@ -25,8 +26,9 @@ const UserProvider = ({ children }) => {
                     'Content-Type': 'application/json'
                 }});
                 const data = (await response.json());
-                if (response.status === 201){
-                    setUsuario(data.data);
+                if (response.status === 200){
+                    console.log('dataa', data);
+                    setUsuario(data);
                     setApiHeader({
                         'Authorization': `Bearer ${logeado.token}`,
                         'Content-Type': 'application/json'
@@ -48,16 +50,20 @@ const UserProvider = ({ children }) => {
 
     async function login(puser, ppassword) {
         try {
-            const response = await fetch(`${servidorAPISEG}login/${puser}/${ppassword}`);
+            //const response = await fetch(`${servidorAPISEG}seguridad/login/${puser}/${ppassword}`);
+            const credenciales = {username: puser, password: ppassword}
+            console.log(credenciales)
+            let response = await fetch(`${servidorAPISEG}seguridad/login`,  {method: "post", headers:{'Content-Type': 'application/json'}, body: JSON.stringify(credenciales)});
+            console.log('ok')
             const data = (await response.json());
             if (response.status === 201){
-                setUsuario(data.data.usuario);
+                setUsuario(data.empleado);
                 setApiHeader({
-                    'Authorization': `Bearer ${data.data.token}`,
+                    'Authorization': `Bearer ${data.token}`,
                     'Content-Type': 'application/json'
                 });
-                window.localStorage.setItem('sesionUsuario', JSON.stringify({usuario: data.data.usuario.usuario, token: data.data.token}))
-                return data.data.usuario
+                window.localStorage.setItem('sesionUsuario', JSON.stringify({usuario: data.empleado.usuario, token: data.token}))
+                return data.empleado
             }else{
                 throw new Error (`[${data.error}]`)                    
             }            

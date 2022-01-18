@@ -16,7 +16,7 @@ import { IoArrowRedoOutline, IoArrowUndoOutline, IoCalendarClearOutline, IoDocum
 const OficioVista = ({oficioId}) => {
     console.log('prop',oficioId);
 
-    const servidorAPI = process.env.REACT_APP_API_URL;
+    const servidorAPI = `${process.env.REACT_APP_API_URL}correspondencia/`;
     const [sumillas, setSumillas] = useState([]);
     const [oficio, setOficio] = useState({});
     const {usuario, apiHeader} = useContext(UserContext);
@@ -31,17 +31,17 @@ const OficioVista = ({oficioId}) => {
 
         async function obtenerData() {
             try {           
+                console.log('busca');
                 const response = await fetch(`${servidorAPI}oficio/${oficioId}`, {method:'GET', headers: apiHeader});
                 const data = (await response.json());
-                if (response.status === 201){
-                    console.log("oficio", data.data);
-                    setOficio(data.data);
+                if (response.status === 200){
+                    setOficio(data);
                     //setShowDetalle(true);
-                    llenaFormulario(data.data);
+                    llenaFormulario(data);
                 }else{
                     throw new Error (`[${data.error}]`)                    
                 }            
-                setSumillas(data.data.sumillas);
+                setSumillas(data.sumillas);
             } catch (error) {
                 notification['error']({
                     message: 'Error',
@@ -49,9 +49,8 @@ const OficioVista = ({oficioId}) => {
                   });    
             }
         }
-        console.log('del detalle');
-        usuario && obtenerData();
-    }, [usuario, oficioId])
+        if (usuario) obtenerData();
+    }, [usuario])
 
     const handleShowDetalle = async (id) => {
        

@@ -1,10 +1,10 @@
 import React, {useState, useEffect, useRef, useContext}  from "react";
 import { Link, useHistory, useLocation } from "react-router-dom";
 import moment from 'moment';
-import { Row, Col, Card, Table, Button, notification, Avatar, Popover, Badge, Input, Form, DatePicker, Alert, Space, Select } from 'antd';
+import { Row, Col, Card, Table, Button, notification, Popover, Badge, Input, Form, DatePicker, Space, Select } from 'antd';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {  faEllipsisH  } from '@fortawesome/free-solid-svg-icons';
-import { IoPersonOutline, IoMailOutline, IoArrowRedoOutline, IoArrowUndoOutline, IoFlashOutline, IoCalendarClearOutline, IoCaretForwardCircleOutline, IoSearch} from 'react-icons/io5'
+import { IoPersonOutline, IoMailOutline, IoArrowRedoOutline, IoArrowUndoOutline,  IoSearch} from 'react-icons/io5'
 import UserContext from "../../contexts/userContext";
 
 
@@ -13,21 +13,20 @@ require('dotenv').config();
 function Oficios2(){
 
     const location = useLocation();
-    const servidorAPI = process.env.REACT_APP_API_URL;
+    //const servidorAPI = process.env.REACT_APP_API_URL;
+    const servidorAPI = `${process.env.REACT_APP_API_URL}correspondencia/`;
 
     const { Column } = Table;
     const { Search } = Input;
-    const { Option } = Select;
 
     let history = useHistory();
 
     const [lista, setLista] = useState(null);
     const [loading, setLoading] = useState(false);
-    const [showBuscar, setShowBuscar] = useState(false);
     const [showFiltro, setShowFiltro] = useState(false);
     const [showMensaje, setShowMensaje] = useState(false);
     const [filtro, setFiltro] = useState(null);
-    const [mensaje, setMensaje] = useState('');
+    const [ setMensaje] = useState('');
 
     const [paginacionManual] = useState(true);
     const [paginaActual, setPaginaActual] = useState(1);
@@ -37,7 +36,6 @@ function Oficios2(){
     const [frmFiltro]  = Form.useForm();
     const [filtroOptions, setFiltroOptions] = useState([]);
     const [filtroValues, setFiltroValues] = useState([]);
-    const refBusAnio = useRef(null);
     const {usuario, apiHeader} = useContext(UserContext);
 
     frmBuscar.setFieldsValue({'txtBusAnio': moment().year()})
@@ -50,7 +48,6 @@ function Oficios2(){
         }
 
        location?.pagina && (pagina = location?.pagina);
-
        setPaginaActual(pagina)
        if (location?.filtro)  {
            //setLista(JSON.parse(window.localStorage.getItem('filtrado')));
@@ -69,20 +66,15 @@ function Oficios2(){
 
     
 
-    const openBusqueda = () => {
-        setShowBuscar(true);        
-        setTimeout(() => {refBusAnio.current.focus();}, 100)
-    }
-
     const clickBuscar = async () =>{
         if (frmBuscar.getFieldValue('txtBusRegistro')){
             try {           
                 const response = await fetch(`${servidorAPI}oficiosByFiltro/${frmBuscar.getFieldValue('txtBusAnio')}/${frmBuscar.getFieldValue('txtBusRegistro')}/0`, {method: 'GET', headers: apiHeader});
                 const data = (await response.json());
-                if (response.status === 201){
+                if (response.status === 200){
                     //console.log('datos', data.data);
                     //data.data.data.length === 1 && history.push(`/corresponencia/oficio/${data.data.data[0].id}`, {method: 'GET', headers: apiHeader});
-                    data.data.data.length === 1 && history.push({pathname: `/correspondencia/oficio/${data.data.data[0].id}`,
+                    data.data.length === 1 && history.push({pathname: `/correspondencia/oficio/${data.data[0].id}`,
                                                                  search: `?filtro=${filtro}&pagina=${paginaActual}`})
                 }else{
                     throw new Error (`[${data.error}]`)                    
@@ -173,9 +165,9 @@ function Oficios2(){
             setLoading(true);
             const response = await fetch(`${servidorAPI}oficiosByFiltro/${panio}/${pregistro}/${ppagina}/?${pfiltro}`, {method: 'GET', headers: apiHeader});
             const data = (await response.json());
-            if (response.status === 201){
-                setLista(data.data.data);
-                setTotalRows(data.data.totalRows);
+            if (response.status === 200){
+                setLista(data.data);
+                setTotalRows(data.totalRows);
             }else{
                 throw new Error (`[${data.error}]`)                    
             }            

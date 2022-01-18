@@ -51,7 +51,8 @@ const Oficio = (props) => {
     });
     const [nuevaSumilla, setNuevaSumilla]=useState(false)
 
-    const servidorAPI = process.env.REACT_APP_API_URL;
+    // const servidorAPI = process.env.REACT_APP_API_URL;
+    const servidorAPI = `${process.env.REACT_APP_API_URL}correspondencia/`;
     const [frmAgregaSumilla]  = Form.useForm();
     const [frmOficio]  = Form.useForm();
     const params = useParams();
@@ -75,14 +76,14 @@ const Oficio = (props) => {
             setLoading(true);
             const response = await fetch(`${servidorAPI}oficio/${params.id}`, {method: 'GET', headers: apiHeader});
             const data = (await response.json());
-            if (response.status === 201){
-                setOficio(data.data);
-                llenaFormulario(data.data);
+            if (response.status === 200){
+                setOficio(data);
+                llenaFormulario(data);
             }else{
                 throw new Error (`[${data.error}]`)                    
             }            
             setLoading(false);
-            setSumillas(data.data.sumillas);
+            setSumillas(data.sumillas);
         } catch (error) {
             console.log('Error', error);
             notification['error']({
@@ -96,8 +97,8 @@ const Oficio = (props) => {
         try {
             const response = await fetch(`${servidorAPI}departamentos`, {method: 'GET', headers: apiHeader});
             const data = (await response.json());
-            if (response.status === 201){
-                setDepartamentos(data.data);
+            if (response.status === 200){
+                setDepartamentos(data);
             }else{
                 throw new Error (`[${data.error}]`)                    
             }            
@@ -114,8 +115,9 @@ const Oficio = (props) => {
         try {
             const response = await fetch(`${servidorAPI}estadoUsuarios`, {method: 'GET', headers: apiHeader});
             const data = (await response.json());
-            if (response.status === 201){
-                setEstadoUsuarios(data.data);
+            if (response.status === 200){
+                console.log('estados', data);
+                setEstadoUsuarios(data);
             }else{
                 throw new Error (`[${data.error}]`)                    
             }            
@@ -171,7 +173,7 @@ const Oficio = (props) => {
                 idSecRegistro2: oficio.idSecRegistro,
                 idRegistro: oficio.id,
                 fechaSumilla: moment(),
-                estadoSumilla:  estadoUsuarios.filter(item => item.id === frmAgregaSumilla.getFieldValue('sltEstadoUsuarios'))[0].estado ,
+                estadoSumilla:  estadoUsuarios.filter(item => item.id === frmAgregaSumilla.getFieldValue('sltEstadoUsuarios'))[0].descripcion ,
                 usuario : usuario.usuario
             }
             nuevaSumilla ? insertaSumilla(registro) : updateSumilla(registro);
@@ -187,7 +189,7 @@ const Oficio = (props) => {
             const data = await response.json();
             if (response.status === 201){
                 let cambio = [...sumillas];
-                registro.sumiIdSecRegistro= data.data;
+                registro.sumiIdSecRegistro= data;
                 registro.estadoSumilla = estadoUsuarios.filter(item => item.id === registro.sumiEstadoUsuarios)[0].estado   
                 cambio.push(registro);
                 setSumillas(cambio);
@@ -206,7 +208,7 @@ const Oficio = (props) => {
         try {
             //let response  = await fetch(`${servidorAPI}sumilla`, {method: "put", headers: {'Content-Type':'application/json'}, body: JSON.stringify(registro)});
             let response  = await fetch(`${servidorAPI}sumilla`, {method: "put", headers: apiHeader, body: JSON.stringify(registro)});
-            if (response.status === 201){
+            if (response.status === 200){
                 let cambio = [...sumillas];
                 cambio = cambio.map( item => item.sumiIdSecRegistro === registro.sumiIdSecRegistro ? registro:item);
                 setSumillas(cambio);
@@ -223,13 +225,15 @@ const Oficio = (props) => {
         try {
             setConfirmBorrar(true);
             let response  = await fetch(`${servidorAPI}sumilla/${pid}`, {method: "delete", headers: apiHeader});
-            const data = await response.json();
-            if (response.status === 201){
+            console.log('delete', response);
+            //const data = await response.json();
+            
+            if (response.status === 200){
                 let cambio = [...sumillas];
                 let nuevas = cambio.filter(item => item.sumiIdSecRegistro !== pid);
                 setSumillas(nuevas);
             }else{
-                throw new Error (`[${data.error}]`)
+                throw new Error (`Error en delete`)
             }
         } catch (error) {
             notification['error']({
@@ -256,8 +260,8 @@ const Oficio = (props) => {
             `${servidorAPI}filtroUsuarios/` + buscar.toUpperCase(),  {method: 'GET', headers: apiHeader})
             .then(async response => {
                 let resultado = await response.json();
-                if (response.status === 201){
-                    let options = await resultado.data.map(item => ({value: `${item.id}${item.empleado}`, 
+                if (response.status === 200){
+                    let options = await resultado.map(item => ({value: `${item.id}${item.empleado}`, 
                     label:
                     <div>
                         {item.tipo === 'I' ? <div><IoPersonOutline style={{color:"#faad14"}}/>{item.empleado}</div>
@@ -531,8 +535,8 @@ const Oficio = (props) => {
                                 <Input.TextArea rows="3"></Input.TextArea>
                             </Form.Item>
                             <Form.Item label="Estado" name="sltEstadoUsuarios" initialValue='E'>
-                                <Select style={{width:"50%"}} >
-                                    {estadoUsuarios.map(item => <Select.Option key={item.id} value={item.id}>{item.estado}</Select.Option>)}
+                                <Select >
+                                    {estadoUsuarios.map(item => <Select.Option key={item.id} value={item.id}>{item.descripcion}</Select.Option>)}
                                 </Select>
                             </Form.Item>
                         </Col>

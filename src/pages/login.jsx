@@ -9,7 +9,7 @@ const Login = () => {
     
 
     const [frmLogin]  = Form.useForm();
-    const { login, usuario, modulo, setModulo, setUsuario } = useContext(UserContext);
+    const { login, setUsuario } = useContext(UserContext);
     const history = useHistory();
     const [logeado, setLogeado] = useState(false)
 

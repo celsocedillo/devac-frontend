@@ -1,7 +1,6 @@
 import React, {useState, useEffect, useContext}  from "react";
 import moment from 'moment';
-import { Row, Col, Card, Table, notification, Radio, Popover, Badge, Drawer, Button, Form, Input, Descriptions, Tag, Divider, Select, Space, DatePicker } from 'antd';
-import TextArea from "antd/lib/input/TextArea";
+import { Row, Col, Card, Table, notification, Radio, Popover, Badge, Drawer, Button, Form, Input,  Select, Space, DatePicker } from 'antd';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSearchPlus, faEllipsisH } from '@fortawesome/free-solid-svg-icons';
 import {  IoArrowUndoOutline, IoSwapHorizontalOutline, IoCopyOutline, IoSearch } from 'react-icons/io5'
@@ -15,11 +14,11 @@ require('dotenv').config();
 
 function BandejaSumillas(){
 
-    const servidorAPI = process.env.REACT_APP_API_URL;
+    //const servidorAPI = process.env.REACT_APP_API_URL;
+    const servidorAPI = `${process.env.REACT_APP_API_URL}correspondencia/`;
     //const gerencia_direccion_id = process.env.GERENCIA_DIRECCION_ID;
 
     const { Column } = Table;
-    const { Option } = Select;
     const { Search } = Input;
     const [frmBuscar] = Form.useForm();
     frmBuscar.setFieldsValue({'txtAnioRegistro': moment().year()})
@@ -31,8 +30,6 @@ function BandejaSumillas(){
     //const [demorados, setDemorados] = useState(0);
     const [enEspera, setEnEspera] = useState();
     const [showDetalle, setShowDetalle] = useState(false);
-    const [oficio, setOficio] = useState({});
-    const [sumillas, setSumillas] = useState([]);
     const [nombresFiltro, setNombreFiltro] = useState([]);
     const [filtroInfo, setFiltroInfo] = useState(null);
     const [paginacionManual, setPaginacionManual] = useState(true);
@@ -49,12 +46,12 @@ function BandejaSumillas(){
     const {usuario} = useContext(UserContext);
     const {apiHeader} = useContext(UserContext);
 
-    const [frmOficio]  = Form.useForm();
     
     useEffect(() => {
        async function obtenerData() {
         //await obtenerSumillas('T', 1);
         const data = await buscarSumillas('T', 0,0,usuario.departamentoId,null,1);
+        console.log('viene');
         console.log(data);
         if (data.data?.length > 0){
             setLista( data.data);
@@ -167,6 +164,7 @@ function BandejaSumillas(){
     
     const handleClickBuscar = async () => {
         const sumillaEncontrada = await buscarSumillas(null,frmBuscar.getFieldValue('txtAnioRegistro'), frmBuscar.getFieldValue('txtRegistro'), usuario.direccionId, null, 0)
+        console.log('find', sumillaEncontrada[0]);
         sumillaEncontrada.length > 0 && handleShowDetalle(sumillaEncontrada[0].idRegistro);
     }
 
@@ -176,9 +174,9 @@ function BandejaSumillas(){
             if (pestado){
                 const response = await fetch(`${servidorAPI}oficiosSumillaDireccion/${usuario.direccionId}/${pestado}/${ppagina}/0/0`, {method: 'GET', headers: apiHeader});
                 const data = (await response.json());
-                if (response.status === 201){
+                if (response.status === 200){
                     setLoading(false);
-                    return data.data
+                    return data
                 }else{
                     throw new Error (`[${data.error}]`)                    
                 }   
@@ -187,18 +185,18 @@ function BandejaSumillas(){
             if (pfiltro){
                 const response = await fetch(`${servidorAPI}oficiosSumillaByFiltro/${usuario.departamentoId}/${ppagina}/?${pfiltro}`, {method: 'GET', headers: apiHeader});        
                 const data = (await response.json());
-                if (response.status === 201){
+                if (response.status === 200){
                     setLoading(false);
-                    return data.data
+                    return data
                 }else{
                     throw new Error (`[${data.error}]`)                    
                 }   
             }else{
                 const response = await fetch(`${servidorAPI}oficiosSumillaDireccion/${pdepartamento}/null/${ppagina}/${panio}/${pregistro}`, {method: 'GET', headers: apiHeader});
                 const data = (await response.json());
-                if (response.status === 201){
+                if (response.status === 200){
                     setLoading(false);
-                    return data.data.data
+                    return data.data
                 }else{
                     throw new Error (`[${data.error}]`)                    
                 }            

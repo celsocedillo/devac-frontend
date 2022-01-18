@@ -1,12 +1,8 @@
 import React, {useState, useEffect, useContext}  from "react";
 import moment from 'moment';
-import { Row, Col, Card, Table, notification, Avatar, Popover, Badge, Drawer, Button, Form, Input, Descriptions, Tag, Divider } from 'antd';
-import TextArea from "antd/lib/input/TextArea";
+import { Row, Col, Card, Table, notification, Avatar, Popover, Badge, Drawer, Button, Form,  } from 'antd';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSearchPlus, faEllipsisH } from '@fortawesome/free-solid-svg-icons';
-import { IoArrowRedoOutline, IoArrowUndoOutline, IoCalendarClearOutline, IoDocumentTextOutline, 
-    IoPersonOutline, IoChevronForwardCircleOutline,
-    IoMailOutline, IoPersonCircleOutline } from 'react-icons/io5'
 import { SiMicrosoftexcel } from "react-icons/si";
 
 import UserContext from "../../contexts/userContext";
@@ -16,8 +12,8 @@ require('dotenv').config();
 
 function EnEspera(){
 
-    const servidorAPI = process.env.REACT_APP_API_URL;
-    const gerencia_direccion_id = process.env.GERENCIA_DIRECCION_ID;
+    //const servidorAPI = process.env.REACT_APP_API_URL;
+    const servidorAPI = `${process.env.REACT_APP_API_URL}correspondencia/`;
 
     const { Column } = Table;
 
@@ -27,14 +23,9 @@ function EnEspera(){
     const [demorados, setDemorados] = useState(0);
     const [enEspera, setEnEspera] = useState();
     const [showDetalle, setShowDetalle] = useState(false);
-    const [oficio, setOficio] = useState({});
-    const [sumillas, setSumillas] = useState([]);
     const {usuario} = useContext(UserContext);
     const {apiHeader} = useContext(UserContext);
     const [oficioId, setOficioId] = useState();
-
-    const [frmOficio]  = Form.useForm();
-    //const [fetchHeader, setFetchHeader] = useState();
 
     
     useEffect(() => {
@@ -54,10 +45,10 @@ function EnEspera(){
                 pathurl = `${servidorAPI}oficiosEnEspera`
                 const response = await fetch(pathurl, {method: 'GET', headers: apiHeader});
                 const data = (await response.json());
-                if (response.status === 201){
-                    setLista(data.data);
-                    setDemorados((data.data.filter( a => a.diasEspera > 6)).length);
-                    setEnEspera(data.data.length - (data.data.filter( a => a.diasEspera > 6)).length)
+                if (response.status === 200){
+                    setLista(data);
+                    setDemorados((data.filter( a => a.diasEspera > 6)).length);
+                    setEnEspera(data.length - (data.filter( a => a.diasEspera > 6)).length)
                 }else{
                     throw new Error (`[${data.error}]`)                    
                 }            
@@ -97,15 +88,6 @@ function EnEspera(){
         //         description: `Error al cargar los oficios ${error}`
         //       });    
         // }
-    }
-
-    const llenaFormulario = (datos) =>{
-        frmOficio.setFieldsValue({'txtRegistro': `${datos.anio}- ${datos.registroDpto}`})
-        frmOficio.setFieldsValue({'txtOficio': `${datos?.tipoOficio} - ${datos?.anio} - ${datos?.digitos}`})
-        frmOficio.setFieldsValue({'txtRemitente': ` ${datos.usuarioOrigen} - ${datos.dptoOrigen}`})
-        frmOficio.setFieldsValue({'txtDestinatario': datos.usuarioDestino})
-        frmOficio.setFieldsValue({'txtAsunto': datos.asunto})
-        frmOficio.setFieldsValue({'txtObservacion': datos.observacion})
     }
 
     const handleClickExcel = async () => {
