@@ -4,7 +4,7 @@ import { Layout, Menu } from 'antd';
 import UserContext from '../contexts/userContext';
 import { Fragment } from 'react';
 import { IoMailOutline, IoFileTrayFullOutline, IoCaretForwardOutline, IoGrid } from 'react-icons/io5'
-import { getOpcionesByUsuario } from '../pages/seguridad/services/seguridad.services'
+import { getOpcionesByUsuario } from '../modulos/seguridad/services/seguridad.services'
 
 const {Sider} = Layout;
 const { SubMenu } = Menu;

@@ -10,3 +10,13 @@ export const getOpcionesByUsuario = async (usuario, apiHeader) =>{
     }            
 
 }
+
+export const getModulosByUsuario = async (usuario, apiHeader) => {
+    const response = await fetch(`${servidorAPI}modulosUsuario/${usuario}`, {method: 'GET', headers: apiHeader});
+    const data = await response.json();
+    if (response.status === 200){
+        return data;
+    }else{
+        throw new Error (`[${data.error}]`)                    
+    }            
+}

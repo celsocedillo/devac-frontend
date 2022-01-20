@@ -4,10 +4,12 @@ import { useHistory} from "react-router-dom";
 
 import { Card, Col, Row, Button } from 'antd';
 
-import UserContext  from '../contexts/userContext';
+import UserContext  from '../../../contexts/userContext';
 import { Fragment } from 'react';
 import {  IoArrowBackOutline } from 'react-icons/io5';
 import {FcFeedback} from 'react-icons/fc';
+
+import { getModulosByUsuario } from '../services/seguridad.services'
 
 const Modulos = () => {
 
@@ -25,7 +27,8 @@ const Modulos = () => {
     console.log("modulo", modulo);
     window.localStorage.setItem('sesionModulo', JSON.stringify(modulo))
     setModulo(modulo);
-    modulo && history.push('/correspondencia/bandejaSumillas');
+    //modulo && history.push('/correspondencia/bandejaSumillas');
+    modulo && history.push('/homeUsuario');
   }
 
     return (

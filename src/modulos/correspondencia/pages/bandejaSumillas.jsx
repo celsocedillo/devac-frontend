@@ -7,8 +7,8 @@ import {  IoArrowUndoOutline, IoSwapHorizontalOutline, IoCopyOutline, IoSearch }
 import { SiMicrosoftexcel } from "react-icons/si";
 
 
-import UserContext from "../../contexts/userContext";
-import OficioVista from "./components/OficioVista";
+import UserContext from "../../../contexts/userContext";
+import OficioVista from "../components/OficioVista";
 
 require('dotenv').config();
 
@@ -86,9 +86,6 @@ function BandejaSumillas(){
 
     }, [usuario]);
 
-    // useEffect(()=>{
-    //     !enEspera && setEnEspera(lista?.filter(a => a.sumillaEstado ==='S').length)
-    // }, [lista])
 
     const obtenerSumillas = async (xestado, pagina) => {
         try{
@@ -134,26 +131,21 @@ function BandejaSumillas(){
 
     const handleChangeEstado = async (e) => {
         let pagina = 0;
-        //e.target.value === 'S' ? pagina = 0 : pagina = 1
-        //e.target.value === 'S' ? setPaginacionManual(false) : setPaginacionManual(true)
         setEstadoFiltroActual(e.target.value);
         setPaginaActual(1);
-        //await obtenerSumillas(e.target.value, pagina);
         const data = await buscarSumillas(e.target.value, 0,0,usuario.departamentoId,null,1);
         setLista( data.data);
         setTotalRows(data.totalRows);
-        //setEnEspera(data.totalEnEspera);
+
     }
 
     const handleTableChange = async (pagination, filters, sorter) => {
-        //console.log('Various parameters', pagination, filters, sorter);
         if (paginacionManual) {
             let data;
             setPaginaActual(pagination.current);
             if (!filtro){
                 data = await buscarSumillas(estadoFiltroActual, 0,0,usuario.departamentoId,null,pagination.current);
             }else{
-                //data = await buscarSumillas(0,0,usuario.departamentoId,filtro,pagination.current);
                 data = await buscarSumillas(null,0,0,usuario.departamentoId,filtro,pagination.current);
             }
             setLista( data.data);
@@ -201,9 +193,6 @@ function BandejaSumillas(){
                     throw new Error (`[${data.error}]`)                    
                 }            
             }
-            // setLoading(true);
-            // const response = await fetch(`${servidorAPI}oficiosSumillaDireccion/${pdepartamento}/null/${ppagina}/${panio}/${pregistro}`, {method: 'GET', headers: apiHeader});
-            // const data = (await response.json());
             return null;
         } catch (error) {
             setLoading(false);
@@ -484,19 +473,6 @@ function BandejaSumillas(){
                        </Button> 
                      }>
             </Column>
-            {/* <Column title="Estado" key="estado" width={50} sorter={(a, b) => a.estado.localeCompare(b.estado)} 
-                onFilter= {(value, record) => record.estado.indexOf(value) === 0}
-                render={rowData => {
-                return(
-                    (
-                        rowData.sumillaEstado === "S" ?
-                        <Tag  color="red" style={{fontSize: '11px', lineHeight: '15px'}} >En espera</Tag>
-                        :
-                        <Tag style={{fontSize: '11px', lineHeight: '15px'}} >Ingesado</Tag>
-                    )
-                    )
-                }
-            }/> */}
        </Table>      
             
             <Drawer 

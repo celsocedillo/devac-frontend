@@ -5,9 +5,9 @@ import { Row, Col, Card, Table, Button, notification, Tag, Popover, Input, Form,
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {  faEllipsisH  } from '@fortawesome/free-solid-svg-icons';
 import {  IoSearch} from 'react-icons/io5'
-import UserContext from "../../contexts/userContext";
+import UserContext from "../../../contexts/userContext";
 //Factorizar despues
-import {getTipoOficios, getReservas} from './services/correspondenciaService'
+import {getTipoOficios, getReservas} from '../services/correspondenciaService'
 
 
 require('dotenv').config();

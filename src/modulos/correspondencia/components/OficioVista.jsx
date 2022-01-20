@@ -5,12 +5,10 @@ import UserContext from '../../../contexts/userContext';
 import moment from 'moment';
 import { Row, Col, Card, Table, notification, Radio, Popover, Badge, Drawer, Button, Form, Input, Descriptions, Tag, Divider } from 'antd';
 import TextArea from "antd/lib/input/TextArea";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSearchPlus, faEllipsisH } from '@fortawesome/free-solid-svg-icons';
 import { IoArrowRedoOutline, IoArrowUndoOutline, IoCalendarClearOutline, IoDocumentTextOutline, 
     IoPersonOutline, IoChevronForwardCircleOutline, 
     IoMailOutline, IoPersonCircleOutline, IoSwapHorizontalOutline, IoCopyOutline } from 'react-icons/io5'
-
+import { getOficioById} from  '../services/correspondenciaService'
     
 
 const OficioVista = ({oficioId}) => {
@@ -31,17 +29,20 @@ const OficioVista = ({oficioId}) => {
 
         async function obtenerData() {
             try {           
-                console.log('busca');
-                const response = await fetch(`${servidorAPI}oficio/${oficioId}`, {method:'GET', headers: apiHeader});
-                const data = (await response.json());
-                if (response.status === 200){
-                    setOficio(data);
-                    //setShowDetalle(true);
-                    llenaFormulario(data);
-                }else{
-                    throw new Error (`[${data.error}]`)                    
-                }            
-                setSumillas(data.sumillas);
+                const data = await getOficioById(oficioId, apiHeader);
+                // const response = await fetch(`${servidorAPI}oficio/${oficioId}`, {method:'GET', headers: apiHeader});
+                // const data = (await response.json());
+                // if (response.status === 200){
+                //     setOficio(data);
+                //     //setShowDetalle(true);
+                //     llenaFormulario(data);
+                // }else{
+                //     throw new Error (`[${data.error}]`)                    
+                // }            
+                //setSumillas(data);
+                setOficio(data);
+                llenaFormulario(data);
+
             } catch (error) {
                 notification['error']({
                     message: 'Error',
@@ -50,7 +51,7 @@ const OficioVista = ({oficioId}) => {
             }
         }
         if (usuario) obtenerData();
-    }, [usuario])
+    }, [usuario, oficioId])
 
     const handleShowDetalle = async (id) => {
        

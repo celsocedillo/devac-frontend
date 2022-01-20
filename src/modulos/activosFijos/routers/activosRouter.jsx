@@ -1,7 +1,7 @@
 import React, { Fragment } from "react";
 import {BrowserRouter as Router,Switch} from "react-router-dom";
-import PrivateRoute from "../../components/privateRoute";
-import EnEspera from "../correspondencia/enEspera";
+import PrivateRoute from "../../../components/privateRoute";
+import EnEspera from "../../../pages/correspondencia/enEspera";
   
   const ActivosRouter = () => {
     return (

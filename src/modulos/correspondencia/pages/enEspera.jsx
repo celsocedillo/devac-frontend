@@ -5,8 +5,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSearchPlus, faEllipsisH } from '@fortawesome/free-solid-svg-icons';
 import { SiMicrosoftexcel } from "react-icons/si";
 
-import UserContext from "../../contexts/userContext";
-import OficioVista from "./components/OficioVista";
+import UserContext from "../../../contexts/userContext";
+import OficioVista from "../components/OficioVista";
 
 require('dotenv').config();
 

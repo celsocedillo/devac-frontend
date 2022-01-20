@@ -3,10 +3,10 @@ import { Link,  useParams, useLocation } from "react-router-dom";
 import moment from 'moment';
 import { Row, Col, Card, Tag, Button,  Descriptions,  
      Form, Input, Select, Skeleton, Radio, notification} from 'antd';
-import UserContext from "../../contexts/userContext";   
+import UserContext from "../../../contexts/userContext";   
 //import  AutoCompBusquedaPersona  from '../correspondencia/components/AutoCompBusquedaPersona';
-import ModalBusquedaPersona from './components/ModalBusquedaPersona'
-import {getTipoOficios, createReserva, updateReserva } from './services/correspondenciaService'
+import ModalBusquedaPersona from '../components/ModalBusquedaPersona'
+import {getTipoOficios, createReserva, updateReserva } from '../services/correspondenciaService'
 import { IoPersonOutline, IoClose, IoSearch, IoArrowBackOutline, IoCalendarOutline, IoSave } from "react-icons/io5";
 
 

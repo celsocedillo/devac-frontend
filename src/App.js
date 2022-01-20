@@ -7,10 +7,10 @@ import {UserProvider}  from './contexts/userContext';
 import login from './pages/login'
 import Cabecera from './components/cabecera';
 import PrivateRoute from './components/privateRoute';
-import Modulos from './pages/modulos';
-import CorrespondenciaRouter from './pages/correspondencia/correspondenciaRouter';
+import Modulos from './modulos/seguridad/pages/modulos';
+import CorrespondenciaRouter from './modulos/correspondencia/routers/correspondenciaRouter';
 import Sidebar from './components/sideBar';
-
+import HomeUsuario from './pages/HomeUsuario';
 
 const { Content } = Layout;
 
@@ -27,14 +27,16 @@ return (
       <Layout>
         <Sidebar/>
         <Layout>
-        <Content style={{minHeight: 540}}>
-        <Route exact path='/' component={login}/>
-        <PrivateRoute exact path='/listaModulos' component={Modulos}/>
-        <PrivateRoute path='/correspondencia' component={CorrespondenciaRouter}/>
-        </Content>
+          <Content style={{minHeight: 540}}>
+            <Route exact path='/' component={login}/>
+            <PrivateRoute exact path='/listaModulos' component={Modulos}/>
+            <PrivateRoute path='/correspondencia' component={CorrespondenciaRouter}/>
+            <PrivateRoute path='/homeUsuario' component={HomeUsuario}/>
+          </Content>
         </Layout>
-        </Layout>
+      </Layout>
     </Layout>
+    {/* <Route path="/redireccion/:usuario/:pagina" component={Redireccion}/> */}
   </Router>    
   </UserProvider>
 </Fragment>
