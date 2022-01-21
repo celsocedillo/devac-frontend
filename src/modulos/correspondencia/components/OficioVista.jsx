@@ -41,6 +41,7 @@ const OficioVista = ({oficioId}) => {
                 // }            
                 //setSumillas(data);
                 setOficio(data);
+                setSumillas(data.sumillas);
                 llenaFormulario(data);
 
             } catch (error) {
