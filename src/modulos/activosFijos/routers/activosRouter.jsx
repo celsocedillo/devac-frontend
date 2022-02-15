@@ -1,16 +1,11 @@
 import React, { Fragment } from "react";
-import {BrowserRouter as Router,Switch} from "react-router-dom";
 import PrivateRoute from "../../../components/privateRoute";
-import EnEspera from "../../../pages/correspondencia/enEspera";
+import ListaCambioCustodioUsuarios from "../pages/cambioCustodiosUsuario"; 
   
   const ActivosRouter = () => {
     return (
         <Fragment>
-            <Router>
-                <Switch>
-                <PrivateRoute exact path='/activos/espera' component={EnEspera}/>
-                </Switch>
-            </Router>
+                <PrivateRoute exact path='/activos/solicitudCambio' component={ListaCambioCustodioUsuarios}/>
         </Fragment> 
     )
   }

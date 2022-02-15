@@ -9,6 +9,7 @@ import Cabecera from './components/cabecera';
 import PrivateRoute from './components/privateRoute';
 import Modulos from './modulos/seguridad/pages/modulos';
 import CorrespondenciaRouter from './modulos/correspondencia/routers/correspondenciaRouter';
+import ActivosRouter from './modulos/activosFijos/routers/activosRouter';
 import Sidebar from './components/sideBar';
 import HomeUsuario from './pages/HomeUsuario';
 
@@ -31,6 +32,7 @@ return (
             <Route exact path='/' component={login}/>
             <PrivateRoute exact path='/listaModulos' component={Modulos}/>
             <PrivateRoute path='/correspondencia' component={CorrespondenciaRouter}/>
+            <PrivateRoute path='/activos' component={ActivosRouter}/>
             <PrivateRoute path='/homeUsuario' component={HomeUsuario}/>
           </Content>
         </Layout>

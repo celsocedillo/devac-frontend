@@ -1,8 +1,9 @@
 //const servidorAPI = `${process.env.REACT_APP_API_URL}reserva/`;
 const servidorAPI = `${process.env.REACT_APP_API_URL}`;
+const logeado = JSON.parse(window.localStorage.getItem('sesionUsuario'));
 
 export const getTipoOficios = async (direccionId, apiHeader) => {
-    console.log('services');
+    console.log('services logeado', logeado);
     const response = await fetch(`${servidorAPI}reserva/tipoOficio/ByDireccion/${direccionId}`, {method: 'GET', headers: apiHeader});
     const data = await response.json();
     if (response.status === 200){
@@ -14,6 +15,7 @@ export const getTipoOficios = async (direccionId, apiHeader) => {
 }
 
 export const getOficioById = async (id, apiHeader) => {
+    console.log('services logeado', logeado);
     const response = await fetch(`${servidorAPI}correspondencia/oficio/${id}`, {method:'GET', headers: apiHeader});
     const data = (await response.json());
     if (response.status === 200){

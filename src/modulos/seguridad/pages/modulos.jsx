@@ -1,5 +1,5 @@
 
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { useHistory} from "react-router-dom";
 
 import { Card, Col, Row, Button } from 'antd';
@@ -10,14 +10,24 @@ import {  IoArrowBackOutline } from 'react-icons/io5';
 import {FcFeedback} from 'react-icons/fc';
 
 import { getModulosByUsuario } from '../services/seguridad.services'
+import { useState } from 'react';
 
 const Modulos = () => {
 
-  const { setModulo } = useContext(UserContext);
+  const { usuario, setModulo, apiHeader } = useContext(UserContext);
   const history = useHistory();
+  const [ lista, setLista] = useState([]);
+
+  useEffect( ()=> {
+    async function getDatos() {
+      const datos = await getModulosByUsuario(usuario.usuario, apiHeader)
+      console.log('modulos', datos);
+      setLista(datos);
+      }
+    getDatos();
+  },[usuario])
 
   const gridStyle = {
-
     textAlign: 'center',
   };
 
@@ -45,6 +55,19 @@ const Modulos = () => {
              </Card>
           </Col>
           )
+          }
+          {
+            lista?.map((e)=> 
+            <Col span={3}  key={e.id}>
+              <Card style={gridStyle}>
+                <Button type='text' onClick={() => handleModulo(e)}>
+                 <FcFeedback style={{fontSize:60}}></FcFeedback>
+                 <div><span style={{fontSize:12}}>{e.labelMenu}</span></div>
+                </Button>
+              </Card>
+           </Col>
+           )
+ 
           }
 
         </Row>

@@ -115,7 +115,7 @@ return (
                         }
                     </SubMenu>
                 </Menu> */}
-
+                <div style={{background: 'background: rgba(255, 255, 255, 0.3)'}}>Titulo</div>
                 {(usuario && modulo) &&
                     <Menu
                         title='Ejemplo'
