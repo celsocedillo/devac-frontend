@@ -60,7 +60,7 @@ const SolicitudCambioCustodioEdit = ({newRecord}) => {
         setShowBusquedaEmpleado(show);
         if (seleccionado){
             frmSolicitud.setFieldsValue({'txtRecepta': `${seleccionado?.empleado}`})
-            setActaEdit({...actaEdit, empleadoReceptaId: seleccionado?.codigo });
+            setActaEdit({...actaEdit, empleadoReceptaId: seleccionado?.codigo, direccionId: seleccionado.direccionId });
         }
     }
 

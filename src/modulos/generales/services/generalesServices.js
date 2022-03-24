@@ -2,7 +2,7 @@ const servidorAPI = `${process.env.REACT_APP_API_URL}`;
 const logeado = JSON.parse(window.localStorage.getItem('sesionUsuario'));
 
 const header ={
-                'Authorization': `Bearer ${logeado.token}`,
+                'Authorization': `Bearer ${logeado?.token}`,
                 'Content-Type': 'application/json'
               }                    
 
