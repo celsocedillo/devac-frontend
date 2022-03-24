@@ -1,0 +1,3 @@
+
+export const EMPLEADOS_FILTRO = "EMPLEADOS_FILTRO";
+
