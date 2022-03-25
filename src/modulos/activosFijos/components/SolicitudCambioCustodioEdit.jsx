@@ -149,7 +149,6 @@ const SolicitudCambioCustodioEdit = ({newRecord}) => {
                 </Col>
             </Row>
             <Row>
-
                 <Col span={18}>
                     <Row>
                         <Col span={24}>
@@ -184,9 +183,9 @@ const SolicitudCambioCustodioEdit = ({newRecord}) => {
                     </Row>
                 </Col>
                 <Col span={6}>
-                    <Row style={{padding: '4px'}}>
+                    <Row style={{padding: '4px', height: '100%'}}>
                         <Col span={24}>
-                            <Card style={{textAlign: 'center'}}>
+                            <Card style={{textAlign: 'center', height: '100%'}}>
                                     <div><IoInformationCircleOutline style={{fontSize: '48px'}}/></div>
                                     <div><h3 style={{margin: '2px'}}>Ingresado</h3></div>
                             </Card>

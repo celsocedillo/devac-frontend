@@ -58,9 +58,9 @@ const SolicitudCambioCustodioLectura = () => {
                     </Row>
             </Col>
             <Col span={6}>
-                <Row style={{padding: '4px'}}>
+                <Row style={{padding: '4px', height: '100%'}}>
                     <Col span={24}>
-                        <Card style={{textAlign: 'center'}}>
+                        <Card style={{textAlign: 'center', height: '100%'}}>
                             {
                                 actaUsuario?.estado === 'AP' ?
                                 <>
