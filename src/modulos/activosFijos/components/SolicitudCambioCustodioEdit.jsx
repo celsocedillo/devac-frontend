@@ -1,18 +1,16 @@
 import React, {useState, useEffect, useRef, useContext, Fragment}  from "react";
 import {  Link, useHistory } from "react-router-dom";
-import { Row, Col, Result, Card, Table, Button, Modal, PageHeader, Badge, Input, Form, Space, Select, Tag, Divider, notification } from 'antd';
+import { Row, Col, Skeleton, Card, Table, Button, Modal, PageHeader, Badge, Input, Form, Space, Select, Tag, Divider, notification } from 'antd';
 import TextArea from "antd/lib/input/TextArea";
 import { useSelector, useDispatch } from "react-redux";
 import { IoPersonOutline, IoCalendarOutline, IoSave, IoArrowBack, IoAdd, IoTrashOutline, IoInformationCircleOutline   } from 'react-icons/io5';
 import UserContext from "../../../contexts/userContext";
 import SearchEmpleado from "../../generales/components/SearchEmpleado";
 import ListaActivosCustodio from "./ListaActivosCustodio";
-import {  
-        updateSolicitudCambioEstado,
-         } from '../services/custodioServices'
 import { createSolicitudCambioEstado, 
          createDetalleSolicitudCambioEstado, 
          deleteDetalleSolicitudCambioEstado,
+         updateSolicitudCambioEstado,
         getActaCambioCustodio } from '../actions/custodioAction';
 
 
@@ -20,7 +18,7 @@ import { createSolicitudCambioEstado,
 const SolicitudCambioCustodioEdit = ({newRecord}) => {
     console.log('<<<< render >>>>>> SolicitudCambioCustodioEdit', )
     const [editNewRecord, setEditNewRecord] = useState(newRecord);
-    const { actaUsuario, success } = useSelector( state => state.custodio);    
+    const { actaUsuario, success, loading, loadingDetail } = useSelector( state => state.custodio);    
     const dispatch = useDispatch();
     const [frmSolicitud]  = Form.useForm();
     const { Column } = Table;
@@ -53,7 +51,7 @@ const SolicitudCambioCustodioEdit = ({newRecord}) => {
             frmSolicitud.setFieldsValue({'txtFechaIngresa': actaUsuario?.fechaIngresa})
             setActaEdit({...actaUsuario})   
         }
-    }, [usuario, editNewRecord, success, actaUsuario,])
+    }, [usuario, editNewRecord, success, actaUsuario, dispatch])
 
 
     const closeSearchEmpleado = async(show, seleccionado) => {
@@ -76,7 +74,7 @@ const SolicitudCambioCustodioEdit = ({newRecord}) => {
             const payload = {...actaEdit,
                 observacion: frmSolicitud.getFieldValue('txtObservacion'),
             }
-            updateSolicitudCambioEstado(payload);
+            dispatch(updateSolicitudCambioEstado(payload));
             notification['success']({
                 message: 'Grabar',
                 description: 'Datos actualizados.'
@@ -133,13 +131,14 @@ const SolicitudCambioCustodioEdit = ({newRecord}) => {
 
     return (
         <Fragment>
+        <Skeleton loading={loading}>
         <Form form={frmSolicitud} layout="horizontal">
             
             <Row>
                 <Form.Item>
                 <Space>
 
-                <Button type="primary" disabled={!(actaEdit?.empleadoReceptaId && actaEdit?.detalle.length>0)} 
+                <Button type="primary" disabled={!(actaEdit?.empleadoReceptaId && actaEdit?.detalle?.length>0)} 
                         onClick={()=>save()} icon={<IoSave/>}> Grabar </Button>                    
                 {/* <Link to={{pathname: `/activos/solicitudCambio`}}><Button icon={<IoArrowBack/>} ><span>Regresar</span></Button></Link> */}
                 </Space>
@@ -195,6 +194,7 @@ const SolicitudCambioCustodioEdit = ({newRecord}) => {
             </Row>
 
         </Form>
+        </Skeleton>
         {/* <Card title='Lista de activos a transferir' size="small"> */}
 
         
@@ -211,6 +211,7 @@ const SolicitudCambioCustodioEdit = ({newRecord}) => {
                 <Col span={24}>
                     <Table 
                         dataSource={actaEdit?.detalle} 
+                        loading={loadingDetail}
                         size="small" 
                         rowKey="actadetId" 
                         pagination={false}

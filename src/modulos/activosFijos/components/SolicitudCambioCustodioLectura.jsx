@@ -1,13 +1,13 @@
 import React, {useState, useEffect, useRef, useContext, Fragment}  from "react";
 import {  Link, } from "react-router-dom";
-import { Row, Col, Card, Table, Button, Result, notification, Popover, Badge, Input, Form, Space, Select, Tag } from 'antd';
+import { Row, Col, Card, Table, Button, Result, notification, Popover, Badge, Input, Form, Skeleton } from 'antd';
 import { IoPersonOutline, IoCalendarOutline, IoCheckmarkCircle, IoCloseCircleOutline, IoAdd, IoTrashOutline   } from 'react-icons/io5';
 import TextArea from "antd/lib/input/TextArea";
 import { useSelector } from "react-redux";
 
 const SolicitudCambioCustodioLectura = () => {
 
-    const { actaUsuario } = useSelector( state => state.custodio);    
+    const { actaUsuario, loading } = useSelector( state => state.custodio);    
     const [frmSolicitud]  = Form.useForm();
     const { Column } = Table;
 
@@ -22,6 +22,7 @@ const SolicitudCambioCustodioLectura = () => {
 
     return (
         <Fragment>
+        <Skeleton active='true' loading={loading}>
         <Form form={frmSolicitud} layout="horizontal" >
         <Row>
             <Col span={18}>
@@ -84,11 +85,13 @@ const SolicitudCambioCustodioLectura = () => {
         </Row>
             
         </Form>
+        </Skeleton>
         <h4>Lista de activos</h4>
         <Row>
             <Col span={24}>
                 <Table 
                     dataSource={actaUsuario?.detalle} 
+                    loading={loading}
                     size="small" 
                     rowKey="activoId" 
                     pagination={false}

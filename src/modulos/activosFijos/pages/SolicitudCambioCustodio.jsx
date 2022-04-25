@@ -1,10 +1,10 @@
 import React, {useState, useEffect, useRef, useContext}  from "react";
 import {  Link, useLocation, useParams } from "react-router-dom";
 import { useSelector, useDispatch} from 'react-redux'
-import { Row, Col, Card, Table, Button, notification, Popover, Badge, Input, Form, DatePicker, Space, Select, Tag } from 'antd';
+import { Skeleton, Spin, Card, Table, Button, notification, Popover, Badge, Input, Form, DatePicker, Space, Select, Tag } from 'antd';
 import { getActaCambioCustodio, createNewSolicitud } from '../actions/custodioAction'
 import UserContext from "../../../contexts/userContext";
-import { IoArrowBack } from 'react-icons/io5';
+import { IoArrowBack, IoServerOutline  } from 'react-icons/io5';
 import SolicitudCambioCustodioLectura from "../components/SolicitudCambioCustodioLectura";
 import SolicitudCambioCustodioEdit from "../components/SolicitudCambioCustodioEdit";
 
@@ -15,7 +15,7 @@ const SolicitudCambioCustodio = () =>{
     const params = useParams();
     const [pageReadOnly, setPageReadOnly] = useState(true);
     const [newRecord, setNewRecord] = useState(false);
-    const { actaUsuario } = useSelector( state => state.custodio);
+    const { actaUsuario, loading } = useSelector( state => state.custodio);
     const {usuario} = useContext(UserContext);
     const dispatch = useDispatch();
     console.log('acta', newRecord);
@@ -38,6 +38,8 @@ const SolicitudCambioCustodio = () =>{
 
   
     return (
+        // <Skeleton active loading={loading}>
+        <Spin tip='Cargando...' spinning={loading}>
         <Card title='Solicitud de cambio de custodio' size="small"
         extra={<Link to={{pathname: `/activos/solicitudCambio`}}><Button icon={<IoArrowBack style={{marginTop:'2px'}} />} size="small" ><span>Regresar</span></Button></Link>}>
             {/* {(pageReadOnly && ((actaUsuario.estado === 'AP') || (actaUsuario.estado === 'AN')))
@@ -53,6 +55,8 @@ const SolicitudCambioCustodio = () =>{
                     : actaUsuario.estado == "EA" && <SolicitudCambioCustodioEdit newRecord={false}></SolicitudCambioCustodioEdit>   
             }
         </Card>
+        </Spin>
+        // </Skeleton>
     )
 
 }
